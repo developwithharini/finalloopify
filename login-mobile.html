@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loopify - Mobile Login & Location</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 30px 30px;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 40px 30px;
+    }
+
+    /* PHONE INPUT SCREEN */
+    #phoneScreen {
+      display: block;
+    }
+
+    #otpScreen,
+    #locationScreen,
+    #successScreen {
+      display: none;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      background-color: #f8f9ff;
+    }
+
+    .phone-input-wrapper {
+      display: flex;
+      gap: 10px;
+    }
+
+    .country-code {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      background: #f5f5f5;
+      padding: 0 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-weight: 600;
+      color: #667eea;
+      min-width: 70px;
+    }
+
+    .phone-input-wrapper input {
+      flex-grow: 1;
+    }
+
+    .help-text {
+      font-size: 12px;
+      color: #999;
+      margin-top: 6px;
+    }
+
+    .button {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .button-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .button-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .button-secondary {
+      background: #f0f0f0;
+      color: #667eea;
+    }
+
+    .button-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .button-group .button {
+      flex: 1;
+    }
+
+    /* OTP INPUT */
+    .otp-container {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .otp-input {
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 24px;
+      font-weight: 700;
+      transition: border-color 0.3s;
+    }
+
+    .otp-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background-color: #f8f9ff;
+    }
+
+    /* ALERTS */
+    .alert {
+      padding: 14px 16px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .alert.show {
+      display: block;
+    }
+
+    .alert-error {
+      background: #ffe5e5;
+      color: #d32f2f;
+      border-left: 4px solid #d32f2f;
+    }
+
+    .alert-success {
+      background: #e8f5e9;
+      color: #388e3c;
+      border-left: 4px solid #388e3c;
+    }
+
+    .alert-info {
+      background: #e3f2fd;
+      color: #000000;
+      border-left: 4px solid #000000;
+    }
+
+    /* LOCATION SECTION */
+    .location-info {
+      background: #f8f9ff;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .location-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .location-status-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .location-status-icon.detecting {
+      background: #fef3cd;
+      animation: pulse 1.5s infinite;
+    }
+
+    .location-status-icon.found {
+      background: #d4edda;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    .location-details {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .hub-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .hub-distance {
+      font-size: 14px;
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .hub-address {
+      font-size: 13px;
+      color: #999;
+      margin-top: 5px;
+    }
+
+    /* SUCCESS SCREEN */
+    .success-container {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .success-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: slideDown 0.6s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .success-container h2 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .success-container p {
+      color: #999;
+      margin-bottom: 20px;
+    }
+
+    .user-info {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: left;
+      margin: 20px 0;
+    }
+
+    .user-info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .user-info-row:last-child {
+      border-bottom: none;
+    }
+
+    .user-info-label {
+      color: #999;
+      font-weight: 600;
+    }
+
+    .user-info-value {
+      color: #333;
+      font-weight: 700;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 480px) {
+      .container {
+        border-radius: 0;
+        min-height: 100vh;
+      }
+
+      .header {
+        padding: 30px 20px 20px;
+      }
+
+      .content {
+        padding: 30px 20px;
+      }
+
+      .header h1 {
+        font-size: 24px;
+      }
+
+      .button {
+        padding: 12px 16px;
+        font-size: 15px;
+      }
+
+      .otp-input {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+      }
+    }
+
+    /* LOADING STATE */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 10px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .timer {
+      font-size: 12px;
+      color: #667eea;
+      font-weight: 600;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">♻️</div>
+      <h1>Loopify</h1>
+      <p>Sustainability Platform</p>
+    </div>
+
+    <div class="content">
+      <!-- PHONE INPUT SCREEN -->
+      <div id="phoneScreen">
+        <h2 style="font-size: 22px; margin-bottom: 10px; color: #333;">Welcome Back!</h2>
+        <p style="color: #999; margin-bottom: 25px;">Login with your mobile number to continue</p>
+
+        <div class="alert alert-error" id="phoneError"></div>
+        <div class="alert alert-info" id="phoneInfo">
+          Demo Mode: OTP will appear in browser console
+        </div>
+
+        <div class="form-group">
+          <label for="phoneInput">Mobile Number</label>
+          <div class="phone-input-wrapper">
+            <div class="country-code">+91</div>
+            <input 
+              type="tel" 
+              id="phoneInput" 
+              placeholder="9876543210"
+              maxlength="10"
+              autocomplete="tel"
+            >
+          </div>
+          <div class="help-text">Enter 10-digit mobile number</div>
+        </div>
+
+        <button class="button button-primary" onclick="sendOTP()" id="sendOTPBtn">
+          Send OTP
+        </button>
+
+        <p style="text-align: center; color: #999; margin-top: 20px; font-size: 12px;">
+          Secured with bank-level encryption
+        </p>
+      </div>
+
+      <!-- OTP VERIFICATION SCREEN -->
+      <div id="otpScreen">
+        <h2 style="font-size: 22px; margin-bottom: 10px; color: #333;">Enter OTP</h2>
+        <p style="color: #999; margin-bottom: 25px;" id="otpPhoneDisplay"></p>
+
+        <div class="alert alert-error" id="otpError"></div>
+
+        <p style="font-size: 14px; color: #667eea; font-weight: 600; margin-bottom: 20px;">
+          📋 Check console for demo OTP
+        </p>
+
+        <div class="form-group">
+          <label>6-Digit OTP</label>
+          <div class="otp-container" id="otpContainer"></div>
+          <div class="timer" id="otpTimer"></div>
+        </div>
+
+        <div class="button-group">
+          <button class="button button-secondary" onclick="goBackToPhone()">Change Number</button>
+          <button class="button button-primary" onclick="verifyOTP()" id="verifyOTPBtn">Verify</button>
+        </div>
+      </div>
+
+      <!-- LOCATION DETECTION SCREEN -->
+      <div id="locationScreen">
+        <h2 style="font-size: 22px; margin-bottom: 10px; color: #333;">📍 Your Location</h2>
+        <p style="color: #999; margin-bottom: 25px;">Detecting your position to show nearest hub...</p>
+
+        <div class="alert alert-error" id="locationError"></div>
+
+        <div class="location-info">
+          <div class="location-status" id="locationStatus">
+            <div class="location-status-icon detecting">📍</div>
+            <div>
+              <div style="font-weight: 600; color: #333;">Detecting Location</div>
+              <div style="font-size: 12px; color: #999;">Waiting for permission...</div>
+            </div>
+          </div>
+          <div class="location-details" id="hubDetails" style="display: none;">
+            <div class="hub-name" id="hubName"></div>
+            <div class="hub-distance" id="hubDistance"></div>
+            <div class="hub-address" id="hubAddress"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="hubSelect">Or Select Manually</label>
+          <select id="hubSelect" onchange="selectHubManually()">
+            <option value="">Loading hubs...</option>
+          </select>
+        </div>
+
+        <button class="button button-primary" onclick="continueToApp()" id="continueBtn" disabled>
+          Continue to App
+        </button>
+      </div>
+
+      <!-- SUCCESS SCREEN -->
+      <div id="successScreen">
+        <div class="success-container">
+          <div class="success-icon">✅</div>
+          <h2>Welcome to Loopify!</h2>
+          <p>You're all set to start your sustainability journey</p>
+
+          <div class="user-info">
+            <div class="user-info-row">
+              <span class="user-info-label">Name</span>
+              <span class="user-info-value" id="successName"></span>
+            </div>
+            <div class="user-info-row">
+              <span class="user-info-label">Phone</span>
+              <span class="user-info-value" id="successPhone"></span>
+            </div>
+            <div class="user-info-row">
+              <span class="user-info-label">EcoPoints</span>
+              <span class="user-info-value" id="successPoints">0</span>
+            </div>
+            <div class="user-info-row">
+              <span class="user-info-label">Nearest Hub</span>
+              <span class="user-info-value" id="successHub"></span>
+            </div>
+          </div>
+
+          <button class="button button-primary" onclick="goToDashboard()">
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====================================================================
+    // STATE MANAGEMENT
+    // ====================================================================
+
+    let state = {
+      phoneNumber: '',
+      sessionToken: null,
+      user: null,
+      otp: '',
+      userLocation: null,
+      selectedHub: null,
+      otpStartTime: null
+    };
+
+    // ====================================================================
+    // PHONE NUMBER LOGIC
+    // ====================================================================
+
+    const phoneInput = document.getElementById('phoneInput');
+    
+    phoneInput.addEventListener('input', (e) => {
+      // Only allow digits
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+    });
+
+    phoneInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendOTP();
+    });
+
+    async function sendOTP() {
+      const phone = phoneInput.value.trim();
+      const errorDiv = document.getElementById('phoneError');
+      const btn = document.getElementById('sendOTPBtn');
+
+      errorDiv.classList.remove('show');
+
+      // Validation
+      if (!phone) {
+        showError(errorDiv, 'Please enter your phone number');
+        return;
+      }
+
+      if (phone.length !== 10) {
+        showError(errorDiv, 'Phone number must be 10 digits');
+        return;
+      }
+
+      // Send request
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Sending...';
+
+      try {
+        const response = await fetch('/api/auth/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone_number: phone })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(errorDiv, data.error || 'Failed to send OTP');
+          btn.disabled = false;
+          btn.innerHTML = 'Send OTP';
+          return;
+        }
+
+        // Success: Show OTP in console for demo
+        if (data.demo_otp) {
+          console.log('📱 DEMO OTP:', data.demo_otp);
+          console.log('Phone:', phone);
+        }
+
+        state.phoneNumber = phone;
+        showOTPScreen(phone);
+
+      } catch (error) {
+        showError(errorDiv, 'Network error. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = 'Send OTP';
+      }
+    }
+
+    function goBackToPhone() {
+      document.getElementById('otpScreen').style.display = 'none';
+      document.getElementById('phoneScreen').style.display = 'block';
+      document.getElementById('otpError').classList.remove('show');
+      clearOTPInputs();
+    }
+
+    // ====================================================================
+    // OTP INPUT LOGIC
+    // ====================================================================
+
+    function showOTPScreen(phone) {
+      document.getElementById('phoneScreen').style.display = 'none';
+      document.getElementById('otpScreen').style.display = 'block';
+      document.getElementById('otpPhoneDisplay').textContent = `OTP sent to +91-${phone}`;
+
+      // Create OTP input boxes
+      const container = document.getElementById('otpContainer');
+      container.innerHTML = '';
+      
+      for (let i = 0; i < 6; i++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.maxLength = 1;
+        input.className = 'otp-input';
+        input.dataset.index = i;
+        input.inputMode = 'numeric';
+        
+        input.addEventListener('input', handleOTPInput);
+        input.addEventListener('keydown', handleOTPKeydown);
+        
+        container.appendChild(input);
+      }
+
+      // Focus first input
+      container.firstChild.focus();
+
+      // Start timer
+      state.otpStartTime = Date.now();
+      updateOTPTimer();
+    }
+
+    function handleOTPInput(e) {
+      const value = e.target.value;
+      
+      // Only allow digits
+      if (!/^\d*$/.test(value)) {
+        e.target.value = '';
+        return;
+      }
+
+      // Move to next input if digit entered
+      if (value && e.target.nextElementSibling) {
+        e.target.nextElementSibling.focus();
+      }
+
+      updateOTPDisplay();
+    }
+
+    function handleOTPKeydown(e) {
+      if (e.key === 'Backspace' && !e.target.value && e.target.previousElementSibling) {
+        e.target.previousElementSibling.focus();
+      }
+
+      if (e.key === 'Enter') {
+        verifyOTP();
+      }
+    }
+
+    function updateOTPDisplay() {
+      const inputs = document.querySelectorAll('.otp-input');
+      state.otp = Array.from(inputs).map(i => i.value).join('');
+    }
+
+    function clearOTPInputs() {
+      document.querySelectorAll('.otp-input').forEach(input => {
+        input.value = '';
+      });
+      state.otp = '';
+    }
+
+    function updateOTPTimer() {
+      const elapsed = Math.floor((Date.now() - state.otpStartTime) / 1000);
+      const remaining = Math.max(0, 300 - elapsed); // 5 minutes
+      const minutes = Math.floor(remaining / 60);
+      const seconds = remaining % 60;
+
+      const timerDiv = document.getElementById('otpTimer');
+      if (remaining > 0) {
+        timerDiv.textContent = `⏱️ Expires in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        setTimeout(updateOTPTimer, 1000);
+      } else {
+        timerDiv.textContent = '⚠️ OTP Expired. Request a new one.';
+        document.getElementById('verifyOTPBtn').disabled = true;
+      }
+    }
+
+    async function verifyOTP() {
+      const otp = state.otp;
+      const errorDiv = document.getElementById('otpError');
+      const btn = document.getElementById('verifyOTPBtn');
+
+      errorDiv.classList.remove('show');
+
+      if (otp.length !== 6) {
+        showError(errorDiv, 'Please enter 6-digit OTP');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Verifying...';
+
+      try {
+        const response = await fetch('/api/auth/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone_number: state.phoneNumber,
+            otp_code: otp
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(errorDiv, data.error || 'OTP verification failed');
+          btn.disabled = false;
+          btn.innerHTML = 'Verify';
+          return;
+        }
+
+        // Success
+        state.sessionToken = data.session_token;
+        state.user = data.user;
+
+        // Save to localStorage
+        localStorage.setItem('sessionToken', data.session_token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        showLocationScreen();
+
+      } catch (error) {
+        showError(errorDiv, 'Network error. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = 'Verify';
+      }
+    }
+
+    // ====================================================================
+    // LOCATION DETECTION
+    // ====================================================================
+
+    function showLocationScreen() {
+      document.getElementById('otpScreen').style.display = 'none';
+      document.getElementById('locationScreen').style.display = 'block';
+      
+      // Fetch hubs for manual selection
+      loadHubsForManualSelection();
+      
+      // Detect user location
+      detectUserLocation();
+    }
+
+    function detectUserLocation() {
+      if (!navigator.geolocation) {
+        showLocationError('Geolocation not supported. Please select hub manually.');
+        loadHubsForManualSelection();
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+          state.userLocation = { latitude, longitude, accuracy };
+          
+          findNearestHub(latitude, longitude);
+          recordLocationToServer(latitude, longitude, accuracy);
+        },
+        (error) => {
+          console.warn('Geolocation error:', error.message);
+          showLocationError('Location access denied. Please select hub manually.');
+          loadHubsForManualSelection();
+        },
+        { 
+          enableHighAccuracy: true, 
+          timeout: 10000,
+          maximumAge: 0 
+        }
+      );
+    }
+
+    async function findNearestHub(lat, lng) {
+      try {
+        const response = await fetch(`/api/location/nearest-hub?lat=${lat}&lng=${lng}`);
+        
+        if (!response.ok) {
+          console.error('Failed to find nearest hub');
+          return;
+        }
+
+        const hub = await response.json();
+        state.selectedHub = hub;
+
+        // Display hub
+        updateLocationDisplay(hub);
+        document.getElementById('continueBtn').disabled = false;
+
+      } catch (error) {
+        console.error('Error finding nearest hub:', error);
+      }
+    }
+
+    function updateLocationDisplay(hub) {
+      document.getElementById('locationStatus').innerHTML = `
+        <div class="location-status-icon found">📍</div>
+        <div>
+          <div style="font-weight: 600; color: #333;">Location Found</div>
+          <div style="font-size: 12px; color: #388e3c;">✓ Connected</div>
+        </div>
+      `;
+
+      document.getElementById('hubName').textContent = hub.hub_name;
+      document.getElementById('hubDistance').textContent = `${hub.distance_km} km away`;
+      document.getElementById('hubAddress').textContent = hub.address || hub.location;
+      document.getElementById('hubDetails').style.display = 'block';
+    }
+
+    async function loadHubsForManualSelection() {
+      try {
+        const response = await fetch('/api/hubs');
+        if (!response.ok) return;
+
+        const hubs = await response.json();
+        const select = document.getElementById('hubSelect');
+        
+        select.innerHTML = '<option value="">Select a hub...</option>';
+        hubs.forEach(hub => {
+          const option = document.createElement('option');
+          option.value = hub.hub_id;
+          option.textContent = `${hub.hub_name} - ${hub.location}`;
+          select.appendChild(option);
+        });
+
+      } catch (error) {
+        console.error('Error loading hubs:', error);
+      }
+    }
+
+    function selectHubManually() {
+      const select = document.getElementById('hubSelect');
+      const hubId = select.value;
+
+      if (hubId) {
+        document.getElementById('continueBtn').disabled = false;
+        // Fetch hub details
+        fetch(`/api/hubs/${hubId}`)
+          .then(r => r.json())
+          .then(hub => {
+            state.selectedHub = hub;
+            updateLocationDisplay(hub);
+          });
+      }
+    }
+
+    async function recordLocationToServer(lat, lng, accuracy) {
+      if (!state.user) return;
+
+      try {
+        await fetch('/api/location/record', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: state.user.user_id,
+            latitude: lat,
+            longitude: lng,
+            accuracy_meters: Math.round(accuracy)
+          })
+        });
+      } catch (error) {
+        console.error('Error recording location:', error);
+      }
+    }
+
+    function showLocationError(message) {
+      const errorDiv = document.getElementById('locationError');
+      showError(errorDiv, message);
+    }
+
+    function continueToApp() {
+      if (!state.selectedHub) {
+        showLocationError('Please select a hub');
+        return;
+      }
+
+      showSuccessScreen();
+    }
+
+    // ====================================================================
+    // SUCCESS SCREEN
+    // ====================================================================
+
+    function showSuccessScreen() {
+      document.getElementById('locationScreen').style.display = 'none';
+      document.getElementById('successScreen').style.display = 'block';
+
+      // Populate success screen
+      document.getElementById('successName').textContent = state.user.name || 'User';
+      document.getElementById('successPhone').textContent = `+91-${state.user.phone_number}`;
+      document.getElementById('successPoints').textContent = state.user.eco_points || '0';
+      document.getElementById('successHub').textContent = state.selectedHub.hub_name;
+    }
+
+    function goToDashboard() {
+      // In production, redirect to dashboard
+      localStorage.setItem('selectedHubId', state.selectedHub.hub_id);
+      alert('Welcome to Loopify! Dashboard would load here.');
+      // window.location.href = '/static/dashboard.html';
+    }
+
+    // ====================================================================
+    // UTILITY FUNCTIONS
+    // ====================================================================
+
+    function showError(element, message) {
+      element.textContent = message;
+      element.classList.add('show');
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 Loopify Login System Ready');
+      console.log('Demo Mode: Use any 10-digit phone number');
+      console.log('OTP will be displayed in console');
+    });
+  </script>
+</body>
+</html>

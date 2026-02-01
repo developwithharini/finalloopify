@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ThriftLoop - Redeem EcoPoints</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #000000 0%, #000000 100%);
+      color: #f5f5f5;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: rgba(0, 0, 0, 0.95);
+      border-bottom: 1px solid #003300;
+      padding: 24px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #6b9e83;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .balance-section {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .balance-card {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid #6b9e83;
+      border-radius: 12px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .balance-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #999;
+    }
+
+    .balance-amount {
+      font-size: 28px;
+      font-weight: 700;
+      color: #6b9e83;
+    }
+
+    /* Back Button */
+    .back-btn {
+      background: transparent;
+      border: 1px solid #003300;
+      color: #999;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn:hover {
+      border-color: #6b9e83;
+      color: #6b9e83;
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    .hero-section {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .hero-title {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #6b9e83 0%, #a8d5ba 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 18px;
+      color: #999;
+      margin-bottom: 24px;
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      background: transparent;
+      border: 1px solid #003300;
+      color: #999;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-tab:hover {
+      border-color: #6b9e83;
+      color: #6b9e83;
+    }
+
+    .filter-tab.active {
+      background: #6b9e83;
+      border-color: #6b9e83;
+      color: #fff;
+    }
+
+    /* Items Grid */
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+
+    /* Item Card */
+    .item-card {
+      background: #000000;
+      border: 1px solid #003300;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-card:hover {
+      border-color: #6b9e83;
+      box-shadow: 0 12px 48px rgba(0, 255, 0, 0.1);
+      transform: translateY(-4px);
+    }
+
+    .item-image {
+      width: 100%;
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, #003300 0%, #000000 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .item-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .item-image.no-image::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(0, 255, 0, 0.1) 50%, transparent 70%);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .item-content {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-category {
+      display: inline-block;
+      background: rgba(0, 255, 0, 0.15);
+      color: #6b9e83;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      width: fit-content;
+      margin-bottom: 12px;
+    }
+
+    .item-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #f5f5f5;
+    }
+
+    .item-description {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 16px;
+      flex: 1;
+    }
+
+    .item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #003300;
+      padding-top: 16px;
+      margin-top: 16px;
+    }
+
+    .item-cost {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .item-cost-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #999;
+      letter-spacing: 0.5px;
+    }
+
+    .item-cost-amount {
+      font-size: 24px;
+      font-weight: 700;
+      color: #6b9e83;
+    }
+
+    /* Redeem Button */
+    .redeem-btn {
+      background: #6b9e83;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .redeem-btn:hover:not(:disabled) {
+      background: #5a8e72;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 255, 0, 0.25);
+    }
+
+    .redeem-btn:disabled {
+      background: #4a4a4a;
+      cursor: not-allowed;
+      opacity: 0.6;
+      position: relative;
+    }
+
+    .redeem-btn:disabled:hover {
+      cursor: help;
+    }
+
+    /* Tooltip */
+    .tooltip-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .tooltip {
+      visibility: hidden;
+      background-color: #ff6b6b;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 8px 12px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #ff6b6b transparent transparent transparent;
+    }
+
+    .redeem-btn:disabled ~ .tooltip,
+    .tooltip-wrapper:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 24px;
+    }
+
+    .empty-state-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .empty-state-text {
+      color: #999;
+      font-size: 16px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background: #000000;
+      border: 1px solid #003300;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 500px;
+      text-align: center;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-icon {
+      font-size: 64px;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #6b9e83;
+    }
+
+    .modal-text {
+      color: #999;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .modal-item {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid #6b9e83;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .modal-item-name {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #f5f5f5;
+    }
+
+    .modal-item-cost {
+      font-size: 14px;
+      color: #6b9e83;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .modal-btn-confirm {
+      background: #6b9e83;
+      color: #fff;
+    }
+
+    .modal-btn-confirm:hover {
+      background: #5a8e72;
+    }
+
+    .modal-btn-cancel {
+      background: transparent;
+      border: 1px solid #003300;
+      color: #999;
+    }
+
+    .modal-btn-cancel:hover {
+      border-color: #6b9e83;
+      color: #6b9e83;
+    }
+
+    /* Redemption History */
+    .history-section {
+      margin-top: 80px;
+      border-top: 1px solid #003300;
+      padding-top: 60px;
+    }
+
+    .history-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: #f5f5f5;
+    }
+
+    .history-list {
+      space-y: 12px;
+    }
+
+    .history-item {
+      background: #000000;
+      border: 1px solid #003300;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .history-item-info h4 {
+      color: #f5f5f5;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .history-item-info p {
+      color: #999;
+      font-size: 13px;
+    }
+
+    .history-item-cost {
+      color: #6b9e83;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .balance-section {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .balance-card {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .hero-title {
+        font-size: 32px;
+      }
+
+      .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+      }
+
+      .modal-content {
+        margin: 20px;
+        max-width: calc(100% - 40px);
+      }
+
+      .filter-tabs {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <div>
+        <div class="logo">
+          <i class="fas fa-leaf" style="color: #6b9e83;"></i>
+          <div>
+            <div style="font-size: 24px; font-weight: 700; color: #6b9e83;">ThriftLoop</div>
+            <div style="font-size: 11px; color: #999; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Redeem Rewards</div>
+          </div>
+        </div>
+      </div>
+      <div class="balance-section">
+        <div class="balance-card">
+          <div>
+            <div class="balance-label">Your EcoPoints</div>
+            <div class="balance-amount" id="current-balance">0</div>
+          </div>
+          <div style="border-left: 1px solid rgba(0, 255, 0, 0.3); padding-left: 16px; margin-left: 16px;">
+            <div class="balance-label">Status</div>
+            <div style="color: #6b9e83; font-weight: 600; font-size: 13px;">Ready to Redeem</div>
+          </div>
+        </div>
+        <button class="back-btn" onclick="promptAdminPassword()">
+          <i class="fas fa-cog"></i> Admin Panel
+        </button>
+        <button class="back-btn" onclick="window.location.href='app.html'">
+          <i class="fas fa-arrow-left"></i>
+          Back to App
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <h1 class="hero-title">✨ Redeem Your EcoPoints</h1>
+      <p class="hero-subtitle">Transform your sustainable choices into pre-loved treasures</p>
+      <div style="background: rgba(0, 255, 0, 0.1); border: 1px solid #6b9e83; border-radius: 12px; padding: 24px; margin-top: 32px; text-align: left;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <div>
+            <div style="font-size: 12px; text-transform: uppercase; color: #999; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px;">Available Points</div>
+            <div id="hero-balance" style="font-size: 32px; font-weight: 700; color: #6b9e83;">0</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; text-transform: uppercase; color: #999; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px;">Redemption Range</div>
+            <div style="font-size: 16px; font-weight: 600; color: #a8d5ba;">25 - 55 points per item</div>
+          </div>
+        </div>
+        <p style="font-size: 13px; color: #999; margin-top: 16px; border-top: 1px solid rgba(0, 255, 0, 0.3); padding-top: 16px;">Each item represents a step towards circular fashion. Browse our curated collection of premium pre-loved items.</p>
+      </div>
+    </div>
+
+    <!-- Section Navigation Tabs -->
+    <div class="section-tabs" style="margin-bottom: 40px; display: flex; gap: 12px; border-bottom: 1px solid #003300; padding-bottom: 20px;">
+      <button class="section-tab active" data-section="thrift-shop" style="padding: 12px 20px; border: none; background: transparent; color: #6b9e83; border-bottom: 2px solid #6b9e83; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s;">
+        <i class="fas fa-shopping-bag"></i> Thrift Shop
+      </button>
+      <button class="section-tab" data-section="upcycle-auction" style="padding: 12px 20px; border: none; background: transparent; color: #999; border-bottom: 2px solid transparent; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s;">
+        <i class="fas fa-gavel"></i> Upcycle Auction
+      </button>
+    </div>
+
+    <!-- Thrift Shop Section -->
+    <div id="thrift-shop-section" class="section-content">
+      <!-- Filter Tabs -->
+      <div style="margin-bottom: 40px;">
+        <h2 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #999; font-weight: 600; margin-bottom: 16px;">Browse by Category</h2>
+        <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">
+          <i class="fas fa-th"></i> All Items
+        </button>
+        <button class="filter-tab" data-filter="clothing">
+          <i class="fas fa-shirt"></i> Clothing
+        </button>
+        <button class="filter-tab" data-filter="decor">
+          <i class="fas fa-couch"></i> Home Decor
+        </button>
+        <button class="filter-tab" data-filter="utility">
+          <i class="fas fa-toolbox"></i> Daily Utility
+        </button>
+      </div>
+    </div>
+
+    <!-- Items Grid -->
+    <div class="items-grid" id="items-container">
+      <!-- Items will be loaded here -->
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="empty-state" style="display: none;">
+      <div class="empty-state-icon">🎁</div>
+      <div class="empty-state-title">Earn EcoPoints First!</div>
+      <p class="empty-state-text">Complete sustainable actions in ReturnBox or MaterialBank to earn points</p>
+    </div>
+
+    <!-- Redemption History -->
+    <div class="history-section" id="history-section" style="display: none;">
+      <h2 class="history-title">📋 Your Redemption History</h2>
+      <div class="history-list" id="history-list">
+        <!-- History items will be loaded here -->
+      </div>
+    </div>
+    </div>
+
+    <!-- Upcycle Auction Section -->
+    <div id="upcycle-auction-section" class="section-content" style="display: none;">
+      <style>
+        .auction-card {
+          background: #000000;
+          border: 2px solid #003300;
+          border-radius: 12px;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+        }
+
+        .auction-card:hover {
+          border-color: #6b9e83;
+          box-shadow: 0 12px 48px rgba(0, 255, 0, 0.15);
+          transform: translateY(-4px);
+        }
+
+        .auction-image-wrapper {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 1;
+          overflow: hidden;
+          background: linear-gradient(135deg, #003300 0%, #000000 100%);
+        }
+
+        .auction-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .auction-time-badge {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          background: rgba(0, 0, 0, 0.8);
+          color: #ff9f43;
+          padding: 8px 12px;
+          border-radius: 8px;
+          font-size: 12px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          backdrop-filter: blur(4px);
+        }
+
+        .auction-info {
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          flex: 1;
+        }
+
+        .auction-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: #f5f5f5;
+          margin: 0;
+        }
+
+        .auction-category {
+          font-size: 13px;
+          color: #999;
+          margin: 0;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .bid-section {
+          background: rgba(0, 255, 0, 0.05);
+          border: 1px solid rgba(0, 255, 0, 0.2);
+          border-radius: 8px;
+          padding: 12px;
+        }
+
+        .bid-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+
+        .bid-label {
+          font-size: 12px;
+          color: #999;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .bid-amount {
+          font-size: 18px;
+          font-weight: 700;
+          color: #6b9e83;
+        }
+
+        .bid-progress-bar {
+          width: 100%;
+          height: 4px;
+          background: #000000;
+          border-radius: 2px;
+          overflow: hidden;
+          margin-bottom: 8px;
+        }
+
+        .bid-progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #6b9e83 0%, #8fb39f 100%);
+          transition: width 1s linear;
+        }
+
+        .bidder-info {
+          font-size: 12px;
+          color: #6b9e83;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .you-leading {
+          color: #ffd93d;
+          font-weight: 600;
+        }
+
+        .highest-bidder {
+          color: #999;
+        }
+
+        .open-bid {
+          color: #6b9e83;
+        }
+
+        .your-bid-notice {
+          font-size: 12px;
+          color: #ff9f43;
+          background: rgba(255, 159, 67, 0.1);
+          padding: 6px 8px;
+          border-radius: 4px;
+          border-left: 2px solid #ff9f43;
+        }
+
+        .bid-input-section {
+          display: flex;
+          gap: 8px;
+        }
+
+        .bid-input-group {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          background: #000000;
+          border: 1px solid #003300;
+          border-radius: 6px;
+          padding: 0 8px;
+        }
+
+        .bid-input {
+          flex: 1;
+          background: transparent;
+          border: none;
+          color: #f5f5f5;
+          padding: 10px 8px;
+          font-size: 14px;
+          outline: none;
+        }
+
+        .bid-input::placeholder {
+          color: #666;
+        }
+
+        .bid-input:disabled {
+          color: #666;
+        }
+
+        .bid-unit {
+          color: #999;
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .place-bid-btn {
+          background: #6b9e83;
+          color: #fff;
+          border: none;
+          padding: 10px 16px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 600;
+          transition: all 0.3s;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          white-space: nowrap;
+        }
+
+        .place-bid-btn:hover:not(:disabled) {
+          background: #5a8e72;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 16px rgba(0, 255, 0, 0.3);
+        }
+
+        .place-bid-btn:disabled {
+          background: #003300;
+          color: #666;
+          cursor: not-allowed;
+        }
+
+        .insufficient-points {
+          font-size: 12px;
+          color: #ff6b6b;
+          background: rgba(255, 107, 107, 0.1);
+          padding: 8px;
+          border-radius: 4px;
+          border-left: 2px solid #ff6b6b;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .hub-pickup {
+          font-size: 12px;
+          color: #999;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          border-top: 1px solid #003300;
+          padding-top: 12px;
+          margin-top: auto;
+        }
+
+        #upcycle-auctions-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 24px;
+          margin-bottom: 60px;
+        }
+
+        .no-auctions {
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: 60px 20px;
+        }
+
+        .auction-notification {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          background: #000000;
+          border: 2px solid #003300;
+          border-radius: 12px;
+          padding: 16px 20px;
+          color: #f5f5f5;
+          font-size: 14px;
+          font-weight: 500;
+          z-index: 1000;
+          opacity: 0;
+          transform: translateY(20px);
+          transition: all 0.3s;
+        }
+
+        .auction-notification.show {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .auction-notification.success {
+          border-color: #6b9e83;
+          background: rgba(0, 255, 0, 0.1);
+          color: #6b9e83;
+        }
+
+        .auction-notification.error {
+          border-color: #ff6b6b;
+          background: rgba(255, 107, 107, 0.1);
+          color: #ff6b6b;
+        }
+
+        .section-tab.active {
+          color: #6b9e83;
+          border-bottom-color: #6b9e83;
+        }
+
+        .section-tab {
+          color: #999;
+          border-bottom-color: transparent;
+        }
+
+        .section-tab:hover {
+          color: #6b9e83;
+        }
+      </style>
+
+      <div style="margin-bottom: 40px;">
+        <h2 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #999; font-weight: 600; margin-bottom: 16px;">
+          <i class="fas fa-fire"></i> Hot Auctions
+        </h2>
+        <p style="color: #999; font-size: 13px; margin: 0;">Items that didn't find a home are getting a second life! Place your bid with EcoPoints.</p>
+      </div>
+
+      <!-- Auctions Container -->
+      <div id="upcycle-auctions-container">
+        <!-- Auctions will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal" id="confirmation-modal">
+    <div class="modal-content">
+      <div class="modal-icon" id="modal-icon">🎉</div>
+      <h2 class="modal-title" id="modal-title">Redemption Confirmed!</h2>
+      <p class="modal-text" id="modal-text"></p>
+      <div class="modal-item" id="modal-item-info">
+        <div class="modal-item-name" id="modal-item-name"></div>
+        <div class="modal-item-cost" id="modal-item-cost"></div>
+      </div>
+      <p class="modal-text">
+        <i class="fas fa-map-marker-alt" style="color: #6b9e83; margin-right: 8px;"></i>
+        Pick up from your nearest community hub
+      </p>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-confirm" onclick="closeModal()">Great!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div class="modal" id="error-modal">
+    <div class="modal-content">
+      <div class="modal-icon" style="color: #ff6b6b;">⚠️</div>
+      <h2 class="modal-title" style="color: #ff6b6b;">Insufficient Points</h2>
+      <p class="modal-text" id="error-message"></p>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-confirm" onclick="closeErrorModal()">Okay</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="ecopoints-system.js"></script>
+  <script src="thriftloop-system.js"></script>
+  <script src="toast-notifications.js"></script>
+  <script src="upcycle-auction-system.js"></script>
+  <script src="upcycle-auction-ui.js"></script>
+  <script src="thriftloop.js"></script>
+  <script>
+    // Section switching functionality
+    document.addEventListener('DOMContentLoaded', () => {
+      const sectionTabs = document.querySelectorAll('.section-tab');
+      const sections = {
+        'thrift-shop': document.getElementById('thrift-shop-section'),
+        'upcycle-auction': document.getElementById('upcycle-auction-section')
+      };
+
+      sectionTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const section = tab.dataset.section;
+          
+          // Update tabs
+          sectionTabs.forEach(t => {
+            t.classList.remove('active');
+            t.style.color = '#999';
+            t.style.borderBottomColor = 'transparent';
+          });
+          tab.classList.add('active');
+          tab.style.color = '#6b9e83';
+          tab.style.borderBottomColor = '#6b9e83';
+
+          // Update sections
+          Object.values(sections).forEach(sec => {
+            if (sec) sec.style.display = 'none';
+          });
+          if (sections[section]) {
+            sections[section].style.display = 'block';
+          }
+
+          // Re-render auctions if switching to auction section
+          if (section === 'upcycle-auction' && window.auctionUI) {
+            window.auctionUI.renderAuctions();
+          }
+        });
+      });
+
+      // Initialize first tab as active
+      if (sectionTabs[0]) {
+        sectionTabs[0].classList.add('active');
+      }
+
+      // Check and finalize any expired auctions on load
+      if (typeof upcycleAuction !== 'undefined') {
+        upcycleAuction.finalizeExpiredAuctions();
+      }
+    });
+
+    // Admin access function - redirect to professional login page
+    function promptAdminPassword() {
+      window.location.href = 'admin-login.html';
+    }
+  </script>
+</body>
+</html>

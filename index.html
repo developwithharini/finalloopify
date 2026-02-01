@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loopify — Sustainability Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background-color: #000;
+      color: #f5f5f5;
+    }
+
+    .sage-accent { color: #6b9e83; }
+    .sage-bg { background-color: #6b9e83; }
+    .sage-border { border-color: #6b9e83; }
+
+    .button-primary {
+      background-color: #6b9e83;
+      color: #000;
+      padding: 12px 32px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .button-primary:hover {
+      background-color: #5a8e72;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(0, 255, 0, 0.2);
+    }
+
+    .button-secondary {
+      background-color: transparent;
+      color: #6b9e83;
+      border: 1.5px solid #6b9e83;
+      padding: 12px 32px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .button-secondary:hover {
+      background-color: rgba(0, 255, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .card-premium {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .card-premium:hover {
+      border-color: #6b9e83;
+      box-shadow: 0 12px 48px rgba(0, 255, 0, 0.15);
+    }
+
+    .text-muted { color: #999; }
+
+    .badge-sage {
+      background-color: rgba(0, 255, 0, 0.15);
+      color: #6b9e83;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tier-card {
+      border-radius: 12px;
+      padding: 32px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid;
+    }
+
+    .tier-card.freemium {
+      background: linear-gradient(135deg, #1a1a1a 0%, #0d2d0a 100%);
+      border-color: #6b9e83;
+    }
+
+    .tier-card.pro {
+      background: linear-gradient(135deg, #1a1a1a 0%, #1a1a1a 100%);
+      border-color: #6b9e83;
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+    }
+
+    .tier-card.enterprise {
+      background: linear-gradient(135deg, #1a1a1a 0%, #1a1a1a 100%);
+      border-color: #6b9e83;
+      box-shadow: 0 0 40px rgba(0, 255, 0, 0.15);
+    }
+
+    .tier-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .tier-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .tier-price {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 16px 0;
+    }
+
+    .tier-features {
+      list-style: none;
+      margin: 24px 0;
+    }
+
+    .tier-features li {
+      padding: 8px 0;
+      border-bottom: 1px solid #333;
+      font-size: 14px;
+    }
+
+    .tier-features li:before {
+      content: "✓ ";
+      color: #6b9e83;
+      font-weight: bold;
+      margin-right: 8px;
+    }
+
+    .feature-box {
+      background-color: #0d0d0d;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .feature-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      color: #6b9e83;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(10px);
+      background-color: rgba(0, 0, 0, 0.8);
+      border-bottom: 1px solid #333;
+    }
+
+    nav a {
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #6b9e83;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .fade-in-up-delay-1 { animation: fadeInUp 0.6s ease-out 0.1s backwards; }
+    .fade-in-up-delay-2 { animation: fadeInUp 0.6s ease-out 0.2s backwards; }
+    .fade-in-up-delay-3 { animation: fadeInUp 0.6s ease-out 0.3s backwards; }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="py-4 px-6">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="text-2xl font-bold sage-accent">Loopify</div>
+      <div class="flex items-center gap-8">
+        <a href="#features" class="text-sm">Features</a>
+        <a href="#pricing" class="text-sm">Pricing</a>
+        <a href="app.html" class="button-primary">Launch App</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="min-h-screen flex items-center justify-center px-4 py-20 bg-gradient-to-b from-black via-black to-gray-900">
+    <div class="max-w-4xl mx-auto text-center space-y-8 fade-in-up">
+      <div class="badge-sage w-fit mx-auto">Intelligent Waste Management Platform</div>
+
+      <h1 class="text-5xl md:text-6xl font-bold leading-tight">
+        Turn Waste Into <span class="sage-accent">Opportunity</span>
+      </h1>
+
+      <p class="text-xl text-muted max-w-2xl mx-auto leading-relaxed">
+        Advanced AI-powered waste classification, food freshness tracking, circular economy management, and real-time environmental impact monitoring. Everything you need for sustainable living.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+        <a href="app.html" class="button-primary">Start Scanning</a>
+        <a href="#pricing" class="button-secondary">View Plans</a>
+      </div>
+
+      <!-- Hero Metrics -->
+      <div class="grid grid-cols-3 gap-4 pt-12 border-t border-gray-800">
+        <div class="fade-in-up-delay-1">
+          <div class="text-2xl font-bold sage-accent">50K+</div>
+          <p class="text-xs text-muted mt-1">Items Classified</p>
+        </div>
+        <div class="fade-in-up-delay-2">
+          <div class="text-2xl font-bold sage-accent">12 Tons</div>
+          <p class="text-xs text-muted mt-1">Waste Diverted</p>
+        </div>
+        <div class="fade-in-up-delay-3">
+          <div class="text-2xl font-bold sage-accent">98%</div>
+          <p class="text-xs text-muted mt-1">Accuracy Rate</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-20 px-4 bg-black">
+    <div class="max-w-7xl mx-auto">
+      <h2 class="text-4xl font-bold text-center mb-4">Powerful Features</h2>
+      <p class="text-center text-muted mb-16 max-w-2xl mx-auto">
+        Everything you need to manage waste responsibly and track your environmental impact.
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="feature-box fade-in-up-delay-1">
+          <div class="feature-icon"><i class="fas fa-camera"></i></div>
+          <h3 class="text-xl font-semibold mb-3">WasteLens AI</h3>
+          <p class="text-muted text-sm">Real-time waste classification with 98% accuracy. Instant disposal guidance and environmental impact scoring.</p>
+        </div>
+
+        <div class="feature-box fade-in-up-delay-2">
+          <div class="feature-icon"><i class="fas fa-apple-alt"></i></div>
+          <h3 class="text-xl font-semibold mb-3">ShelfLife Tracker</h3>
+          <p class="text-muted text-sm">Track food freshness, get spoilage alerts, and prevent waste before it happens.</p>
+        </div>
+
+        <div class="feature-box fade-in-up-delay-3">
+          <div class="feature-icon"><i class="fas fa-box"></i></div>
+          <h3 class="text-xl font-semibold mb-3">ReturnBox Manager</h3>
+          <p class="text-muted text-sm">Manage circular returns and track reuse metrics in real-time.</p>
+        </div>
+
+        <div class="feature-box fade-in-up-delay-1">
+          <div class="feature-icon"><i class="fas fa-link"></i></div>
+          <h3 class="text-xl font-semibold mb-3">MaterialBank</h3>
+          <p class="text-muted text-sm">Connect producers with reusers. Build circular supply chains and reduce industrial waste.</p>
+        </div>
+
+        <div class="feature-box fade-in-up-delay-2">
+          <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+          <h3 class="text-xl font-semibold mb-3">Impact Dashboard</h3>
+          <p class="text-muted text-sm">Visualize your environmental impact with real-time metrics and carbon reduction tracking.</p>
+        </div>
+
+        <div class="feature-box fade-in-up-delay-3">
+          <div class="feature-icon"><i class="fas fa-graduation-cap"></i></div>
+          <h3 class="text-xl font-semibold mb-3">AR Education</h3>
+          <p class="text-muted text-sm">Interactive learning with real-time waste detection and environmental insights.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="py-20 px-4 bg-gradient-to-b from-black via-black to-gray-900">
+    <div class="max-w-7xl mx-auto">
+      <h2 class="text-4xl font-bold text-center mb-4">Flexible Plans</h2>
+      <p class="text-center text-muted mb-16 max-w-2xl mx-auto">
+        Choose the perfect plan for your sustainability journey. All plans include free access to our core features.
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Freemium Tier -->
+        <div class="tier-card freemium fade-in-up-delay-1">
+          <div class="tier-icon"><i class="fas fa-seedling"></i></div>
+          <h3 class="text-2xl font-bold mb-2">Starter</h3>
+          <div class="tier-price">Free</div>
+          <p class="text-sm text-muted mb-6">Perfect for individuals learning about sustainable waste.</p>
+          <ul class="tier-features">
+            <li>WasteLens Basic (3 scans/month)</li>
+            <li>ShelfLife Tracker</li>
+            <li>Basic Impact Dashboard</li>
+            <li>AR Education Module</li>
+            <li>Community Forum</li>
+          </ul>
+          <a href="app.html" class="button-primary w-full text-center mt-8 block">Get Started</a>
+        </div>
+
+        <!-- Pro Tier -->
+        <div class="tier-card pro fade-in-up-delay-2">
+          <div class="badge-sage" style="position: absolute; top: 16px; right: 16px;">RECOMMENDED</div>
+          <div class="tier-icon"><i class="fas fa-bolt"></i></div>
+          <h3 class="text-2xl font-bold mb-2">Professional</h3>
+          <div class="tier-price">$20<span class="text-lg">/month</span></div>
+          <p class="text-sm text-muted mb-6">For serious sustainability advocates and businesses.</p>
+          <ul class="tier-features">
+            <li>Unlimited WasteLens Scans</li>
+            <li>Advanced ShelfLife Predictions</li>
+            <li>MaterialBank Exchange Access</li>
+            <li>Full Impact Analytics</li>
+            <li>Priority Support</li>
+            <li>Custom Reports</li>
+            <li>API Access (Basic)</li>
+          </ul>
+          <a href="payment.html?plan=pro" class="button-primary w-full text-center mt-8 block">Upgrade Now</a>
+        </div>
+
+        <!-- Enterprise Tier -->
+        <div class="tier-card enterprise fade-in-up-delay-3">
+          <div class="tier-icon"><i class="fas fa-crown"></i></div>
+          <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
+          <div class="tier-price">Custom</div>
+          <p class="text-sm text-muted mb-6">For large-scale sustainability programs and organizations.</p>
+          <ul class="tier-features">
+            <li>Everything in Pro</li>
+            <li>Unlimited Everything</li>
+            <li>White-label Solution</li>
+            <li>Advanced API (v2)</li>
+            <li>Dedicated Account Manager</li>
+            <li>Custom Integrations</li>
+            <li>24/7 Priority Support</li>
+          </ul>
+          <button onclick="openContactModal()" class="button-primary w-full text-center mt-8 block" style="display: inline-block; width: 100%; padding: 12px 32px; background-color: #6b9e83; color: #fff; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; text-decoration: none;">Contact Admin</button>
+        </div>
+      </div>
+
+      <!-- Contact Form Modal -->
+      <div id="contact-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: #1a1a1a; border: 1px solid #333; border-radius: 16px; padding: 40px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2 style="font-size: 28px; font-weight: bold; color: #f5f5f5; margin: 0;">Contact Our Sales Team</h2>
+            <button onclick="closeContactModal()" style="background: none; border: none; color: #999; font-size: 28px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">×</button>
+          </div>
+
+          <form id="contact-form" style="display: flex; flex-direction: column; gap: 20px;">
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Full Name</label>
+              <input type="text" id="contact-name" placeholder="Your name" required style="width: 100%; padding: 12px 16px; background: rgba(45, 52, 54, 0.5); border: 1px solid #003300; border-radius: 8px; color: #f5f5f5; font-size: 14px; font-family: inherit; box-sizing: border-box;">
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Email Address</label>
+              <input type="email" id="contact-email" placeholder="your@email.com" required style="width: 100%; padding: 12px 16px; background: rgba(45, 52, 54, 0.5); border: 1px solid #003300; border-radius: 8px; color: #f5f5f5; font-size: 14px; font-family: inherit; box-sizing: border-box;">
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Phone Number</label>
+              <input type="tel" id="contact-phone" placeholder="Your phone number" style="width: 100%; padding: 12px 16px; background: rgba(45, 52, 54, 0.5); border: 1px solid #003300; border-radius: 8px; color: #f5f5f5; font-size: 14px; font-family: inherit; box-sizing: border-box;">
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Organization</label>
+              <input type="text" id="contact-org" placeholder="Your organization name" style="width: 100%; padding: 12px 16px; background: rgba(45, 52, 54, 0.5); border: 1px solid #003300; border-radius: 8px; color: #f5f5f5; font-size: 14px; font-family: inherit; box-sizing: border-box;">
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Message</label>
+              <textarea id="contact-message" placeholder="Tell us about your enterprise needs..." required style="width: 100%; padding: 12px 16px; background: rgba(45, 52, 54, 0.5); border: 1px solid #003300; border-radius: 8px; color: #f5f5f5; font-size: 14px; font-family: inherit; box-sizing: border-box; min-height: 120px; resize: vertical;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+              <button type="submit" style="flex: 1; padding: 12px 24px; background-color: #6b9e83; color: #000; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.3s ease;">
+                <i class="fas fa-paper-plane"></i> Send Message
+              </button>
+              <button type="button" onclick="closeContactModal()" style="flex: 1; padding: 12px 24px; background: transparent; color: #6b9e83; border: 1px solid #6b9e83; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.3s ease;">
+                Cancel
+              </button>
+            </div>
+          </form>
+
+          <div id="contact-success" style="display: none; text-align: center; padding: 20px;">
+            <div style="font-size: 48px; color: #6b9e83; margin-bottom: 16px;">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 style="font-size: 20px; font-weight: bold; color: #f5f5f5; margin-bottom: 8px;">Message Sent!</h3>
+            <p style="color: #999; margin-bottom: 20px;">Thank you for reaching out. Our sales team will contact you within 24 hours.</p>
+            <button onclick="closeContactModal()" style="padding: 10px 20px; background-color: #6b9e83; color: #000; border: none; border-radius: 8px; cursor: pointer;">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        function openContactModal() {
+          document.getElementById('contact-modal').style.display = 'flex';
+        }
+
+        function closeContactModal() {
+          document.getElementById('contact-modal').style.display = 'none';
+          document.getElementById('contact-form').style.display = 'flex';
+          document.getElementById('contact-success').style.display = 'none';
+          document.getElementById('contact-form').reset();
+        }
+
+        document.getElementById('contact-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const formData = {
+            name: document.getElementById('contact-name').value,
+            email: document.getElementById('contact-email').value,
+            phone: document.getElementById('contact-phone').value || '',
+            organization: document.getElementById('contact-org').value || '',
+            message: document.getElementById('contact-message').value
+          };
+
+          try {
+            const response = await fetch('http://localhost:3000/api/contact-admin', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+              // Show success message
+              document.getElementById('contact-form').style.display = 'none';
+              document.getElementById('contact-success').style.display = 'block';
+            } else {
+              const error = await response.json();
+              alert('Error: ' + (error.error || 'Failed to send message'));
+            }
+          } catch (error) {
+            alert('Error: ' + error.message);
+          }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('contact-modal').addEventListener('click', (e) => {
+          if (e.target.id === 'contact-modal') {
+            closeContactModal();
+          }
+        });
+      </script>
+
+      <!-- Demo Coupon Notice -->
+      <div class="mt-16 max-w-2xl mx-auto">
+        <div class="card-premium text-center border-sage-accent">
+          <p class="text-sm text-muted mb-2">Testing Loopify?</p>
+          <p class="text-lg font-semibold mb-2">Use coupon code <span class="sage-accent font-bold">DEMO</span> for full access</p>
+          <p class="text-xs text-muted">1000% discount - Perfect for trying all features</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 px-4 bg-black">
+    <div class="max-w-3xl mx-auto text-center space-y-8 fade-in-up">
+      <h2 class="text-3xl font-bold">Ready to Transform Your Waste?</h2>
+      <p class="text-muted text-lg">
+        Join thousands of users committed to circular sustainability.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="app.html" class="button-primary">Launch App</a>
+        <a href="payment.html?plan=pro" class="button-secondary">See Pricing</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-800 py-12 px-4 bg-black">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid md:grid-cols-4 gap-8 mb-12">
+        <div>
+          <div class="text-lg font-bold sage-accent mb-4">Loopify</div>
+          <p class="text-xs text-muted">Intelligent waste management for a sustainable future.</p>
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm mb-4">Product</h4>
+          <ul class="space-y-2 text-xs text-muted">
+            <li><a href="#features" class="hover:text-sage-accent transition">Features</a></li>
+            <li><a href="#pricing" class="hover:text-sage-accent transition">Pricing</a></li>
+            <li><a href="app.html" class="hover:text-sage-accent transition">App</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm mb-4">Company</h4>
+          <ul class="space-y-2 text-xs text-muted">
+            <li><a href="#" class="hover:text-sage-accent transition">About</a></li>
+            <li><a href="#" class="hover:text-sage-accent transition">Blog</a></li>
+            <li><a href="#" class="hover:text-sage-accent transition">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm mb-4">Legal</h4>
+          <ul class="space-y-2 text-xs text-muted">
+            <li><a href="#" class="hover:text-sage-accent transition">Privacy</a></li>
+            <li><a href="#" class="hover:text-sage-accent transition">Terms</a></li>
+            <li><a href="#" class="hover:text-sage-accent transition">Security</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 pt-8 text-center text-xs text-muted">
+        <p>&copy; 2026 Loopify. Committed to circular sustainability.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loopify — Circular Sustainability Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background-color: #000;
+      color: #f5f5f5;
+    }
+
+    /* Color System */
+    .sage-accent { color: #6b9e83; }
+    .sage-bg { background-color: #6b9e83; }
+    .sage-border { border-color: #6b9e83; }
+
+    /* Buttons */
+    .button-primary {
+      background-color: #6b9e83;
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .button-primary:hover {
+      background-color: #5a8e72;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 255, 0, 0.25);
+    }
+
+    .button-secondary {
+      background-color: transparent;
+      color: #6b9e83;
+      border: 1.5px solid #6b9e83;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .button-secondary:hover {
+      background-color: rgba(0, 255, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    /* Cards */
+    .card-premium {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 32px;
+      transition: all 0.3s ease;
+    }
+
+    .card-premium:hover {
+      border-color: #6b9e83;
+      box-shadow: 0 12px 48px rgba(0, 255, 0, 0.1);
+    }
+
+    .text-muted { color: #999; }
+
+    .badge-sage {
+      background-color: rgba(0, 255, 0, 0.15);
+      color: #6b9e83;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+    }
+
+    .badge-premium {
+      background-color: rgba(0, 255, 0, 0.2);
+      color: #6b9e83;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid #6b9e83;
+    }
+
+    /* Header */
+    .header {
+      background-color: #000;
+      border-bottom: 1px solid #333;
+      padding: 16px 32px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #6b9e83;
+      cursor: pointer;
+    }
+
+    .tier-info {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    /* Hero Section */
+    .hero {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 80px 32px;
+      text-align: center;
+    }
+
+    .hero-title {
+      font-size: 56px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .hero-subtitle {
+      font-size: 18px;
+      color: #999;
+      margin-bottom: 32px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 64px;
+    }
+
+    /* Progress Steps */
+    .progress-steps {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+      text-align: center;
+    }
+
+    .steps-container {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: #999;
+      transition: all 0.3s ease;
+    }
+
+    .step.active .step-number {
+      background-color: #6b9e83;
+      color: #000;
+      box-shadow: 0 4px 12px rgba(0, 255, 0, 0.3);
+    }
+
+    .step-label {
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #999;
+    }
+
+    .step-description {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    /* Tier Cards */
+    .tiers-section {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    .tiers-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 48px;
+      text-align: center;
+    }
+
+    .tiers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .tier-card {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 48px 32px;
+      transition: all 0.3s ease;
+      text-align: center;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tier-card:hover {
+      border-color: #6b9e83;
+      box-shadow: 0 12px 48px rgba(0, 255, 0, 0.1);
+      transform: translateY(-4px);
+    }
+
+    .tier-card.premium::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background-color: #6b9e83;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .tier-name {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .tier-subtitle {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tier-price {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .tier-price-desc {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 32px;
+    }
+
+    .tier-features {
+      text-align: left;
+      margin-bottom: 32px;
+      flex: 1;
+    }
+
+    .tier-feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      font-size: 14px;
+      border-bottom: 1px solid #333;
+    }
+
+    .tier-feature:last-child {
+      border-bottom: none;
+    }
+
+    .tier-feature-icon {
+      color: #6b9e83;
+      font-weight: 600;
+    }
+
+    .tier-cta {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .tier-cta.primary {
+      background-color: #6b9e83;
+      color: #fff;
+    }
+
+    /* Footer */
+    .footer {
+      background-color: #0d0d0d;
+      border-top: 1px solid #333;
+      padding: 48px 32px;
+      text-align: center;
+    }
+
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .footer-text {
+      font-size: 13px;
+      color: #999;
+      line-height: 1.6;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-title { font-size: 40px; }
+      .hero-subtitle { font-size: 16px; }
+      .hero { padding: 60px 24px; }
+      .progress-steps { padding: 0 24px 60px; }
+      .tiers-section { padding: 0 24px 60px; }
+      .tiers-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .header { padding: 12px 16px; }
+      .header-content { flex-direction: column; gap: 16px; }
+      .hero { padding: 40px 16px; }
+      .hero-title { font-size: 32px; }
+      .hero-subtitle { font-size: 14px; }
+      .hero-cta { flex-direction: column; }
+      .hero-cta .button-primary,
+      .hero-cta .button-secondary {
+        width: 100%;
+      }
+      .progress-steps { padding: 0 16px 40px; }
+      .steps-container {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        gap: 12px;
+      }
+      .step-description { display: none; }
+      .tiers-section { padding: 0 16px 40px; }
+      .tier-card { padding: 32px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <div class="logo" onclick="goHome()">🌱 Loopify</div>
+      <div class="tier-info" id="tierInfo" style="display: none;">
+        <span id="tierBadge" class="badge-premium">Freemium</span>
+        <button class="button-secondary" onclick="logout()" style="font-size: 13px; padding: 8px 16px;">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div id="homePage">
+    <!-- Hero Section -->
+    <div class="hero">
+      <h1 class="hero-title">Loopify</h1>
+      <p class="hero-subtitle">
+        A unified circular sustainability platform. Classify waste, prevent food spoilage, track circular returns, 
+        match industrial resources, and measure your impact.
+      </p>
+      <div class="hero-cta">
+        <button class="button-primary" onclick="startFreemium()" style="font-size: 16px; padding: 16px 40px;">
+          Start with Freemium
+        </button>
+        <button class="button-secondary" onclick="showTiers()" style="font-size: 16px; padding: 16px 40px;">
+          Explore Premium
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="progress-steps" id="stepsSection" style="display: none;">
+      <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 32px;">Your Journey</h2>
+      <div class="steps-container">
+        <div class="step active">
+          <div class="step-number">1</div>
+          <div class="step-label">WasteLens</div>
+          <div class="step-description">Classify waste</div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-label">ShelfLife</div>
+          <div class="step-description">Prevent spoilage</div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-label">ReturnBox</div>
+          <div class="step-description">Track returns</div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-label">MaterialBank</div>
+          <div class="step-description">Match resources</div>
+        </div>
+        <div class="step">
+          <div class="step-number">5</div>
+          <div class="step-label">Impact</div>
+          <div class="step-description">Measure effect</div>
+        </div>
+      </div>
+      <p class="text-muted" style="font-size: 14px; margin-bottom: 32px;">
+        Complete levels sequentially to unlock advanced features.
+      </p>
+      <button class="button-primary" onclick="goToApp()" style="font-size: 16px; padding: 16px 40px;">
+        Continue to App →
+      </button>
+    </div>
+
+    <!-- Tier Cards Section -->
+    <div class="tiers-section" id="tiersSection" style="display: none;">
+      <h2 class="tiers-title">Choose Your Path</h2>
+      <div class="tiers-grid">
+        <!-- Freemium Tier -->
+        <div class="tier-card">
+          <h3 class="tier-name">Freemium</h3>
+          <p class="tier-subtitle">For Individuals</p>
+          <div class="tier-price">Free</div>
+          <p class="tier-price-desc">Forever</p>
+          <div class="tier-features">
+            <div class="tier-feature">
+              <span class="tier-feature-icon">✓</span>
+              <span>WasteLens (AI classification)</span>
+            </div>
+            <div class="tier-feature">
+              <span class="tier-feature-icon">✓</span>
+              <span>ShelfLife (Food prevention)</span>
+            </div>
+            <div class="tier-feature">
+              <span class="tier-feature-icon">✓</span>
+              <span>ReturnBox (Basic tracking)</span>
+            </div>
+            <div class="tier-feature">
+              <span class="tier-feature-icon">✗</span>
+              <span style="color: #666;">MaterialBank</span>
+            </div>
+            <div class="tier-feature">
+              <span class="tier-feature-icon">✗</span>
+              <span style="color: #666;">Full Impact Dashboard</span>
+            </div>
+          </div>
+          <button class="button-primary tier-cta" onclick="startFreemium()">Get Started</button>
+        </div>
+
+        <!-- Premium Tier -->
+        <div class="tier-card premium">
+          <h3 class="tier-name">Premium</h3>
+          <p class="tier-subtitle">For Organizations</p>
+          <div class="tier-price">$20</div>
+          <p class="tier-price-desc">per month, billed annually</p>
+          <div class="tier-features">
+            <div class="tier-feature">
+              <span class="tier-feature-icon">✓</span>
+              <span>All Freemium features</span>
+            </div>
+            <div class="tier-feature">
+              <span class="tier-feature-icon">✓</span>
+              <span>MaterialBank (Industrial matching)</span>
+            </div>
+            <div class="tier-feature">
+              <span class="tier-feature-icon">✓</span>
+              <span>Full Impact Dashboard</span>
+            </div>
+            <div class="tier-feature">
+              <span class="tier-feature-icon">✓</span>
+              <span>Advanced analytics</span>
+            </div>
+            <div class="tier-feature">
+              <span class="tier-feature-icon">✓</span>
+              <span>Priority support</span>
+            </div>
+          </div>
+          <button class="button-primary tier-cta primary" onclick="upgradeToPremium()">Upgrade to Premium</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Container (hidden until user selects tier) -->
+  <div id="appContainer" style="display: none;">
+    <iframe id="appFrame" src="app.html" style="width: 100%; height: 100vh; border: none;"></iframe>
+  </div>
+
+  <script src="platform-app.js"></script>
+  <script src="news-api-integration.js"></script>
+  <script src="eco-loop-rag-kb.js"></script>
+  <script src="loopify-chatbot.js"></script>
+  <script src="floating-chat-widget.js"></script>
+</body>
+</html>

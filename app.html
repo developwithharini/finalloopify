@@ -1,0 +1,2367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loopify — Complete Sustainability Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background-color: #000;
+      color: #f5f5f5;
+    }
+
+    /* Color System */
+    .sage-accent { color: #6b9e83; }
+    .sage-bg { background-color: #6b9e83; }
+    .sage-border { border-color: #6b9e83; }
+    .sage-hover:hover { background-color: #5a8e72; color: #fff; }
+
+    /* Buttons */
+    .button-primary {
+      background-color: #6b9e83;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .button-primary:hover:not(:disabled) {
+      background-color: #5a8e72;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 255, 0, 0.25);
+    }
+
+    .button-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .button-secondary {
+      background-color: transparent;
+      color: #6b9e83;
+      border: 1.5px solid #6b9e83;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .button-secondary:hover:not(:disabled) {
+      background-color: rgba(0, 255, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    /* Cards */
+    .card-premium {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .card-premium:hover {
+      border-color: #6b9e83;
+      box-shadow: 0 12px 48px rgba(0, 255, 0, 0.1);
+    }
+
+    .text-muted { color: #999; }
+
+    .badge-sage {
+      background-color: rgba(0, 255, 0, 0.15);
+      color: #6b9e83;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Inputs */
+    .input-premium {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      color: #f5f5f5;
+      padding: 12px 16px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .input-premium:focus {
+      outline: none;
+      border-color: #6b9e83;
+      box-shadow: 0 0 0 3px rgba(0, 255, 0, 0.1);
+    }
+
+    .input-premium::placeholder { color: #666; }
+
+    .select-premium {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      color: #f5f5f5;
+      padding: 12px 16px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .select-premium:focus {
+      outline: none;
+      border-color: #6b9e83;
+      box-shadow: 0 0 0 3px rgba(0, 255, 0, 0.1);
+    }
+
+    /* Layout */
+    .sidebar {
+      width: 280px;
+      background-color: #0d0d0d;
+      border-right: 1px solid #333;
+      padding: 24px 0;
+      height: 100vh;
+      overflow-y: auto;
+      position: fixed;
+      left: 0;
+      top: 0;
+    }
+
+    .main-content {
+      margin-left: 280px;
+      min-height: 100vh;
+      background-color: #000;
+    }
+
+    /* Navigation Items */
+    .nav-item {
+      padding: 12px 24px;
+      margin: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+      color: #999;
+    }
+
+    .nav-item:hover {
+      background-color: rgba(0, 255, 0, 0.1);
+      color: #6b9e83;
+    }
+
+    .nav-item.active {
+      background-color: rgba(0, 255, 0, 0.15);
+      color: #6b9e83;
+      border-left-color: #6b9e83;
+    }
+
+    .nav-section-title {
+      padding: 16px 24px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #666;
+    }
+
+    /* Sections */
+    .section {
+      display: none;
+      padding: 32px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Preview Container */
+    .preview-container {
+      width: 100%;
+      aspect-ratio: 1;
+      background-color: #0d0d0d;
+      border: 1px solid #333;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 16px;
+    }
+
+    .preview-container:hover {
+      border-color: #6b9e83;
+    }
+
+    .preview-container img,
+    .preview-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(0, 255, 0, 0.3);
+      border-top-color: #6b9e83;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Confidence Bar */
+    .confidence-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #333;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .confidence-fill {
+      height: 100%;
+      background-color: #6b9e83;
+      transition: width 0.6s ease;
+    }
+
+    /* Mode Toggle */
+    .input-mode-toggle {
+      display: flex;
+      gap: 8px;
+      background-color: #0d0d0d;
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      margin-bottom: 16px;
+    }
+
+    .input-mode-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      background-color: transparent;
+      color: #999;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .input-mode-btn.active {
+      background-color: #6b9e83;
+      color: #fff;
+    }
+
+    /* Hidden inputs */
+    .hidden-file-input { display: none; }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 240px;
+      }
+
+      .main-content {
+        margin-left: 240px;
+      }
+
+      .section {
+        padding: 24px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid #333;
+        padding: 12px 0;
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .section {
+        padding: 16px;
+      }
+    }
+
+    /* Table Styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #333;
+    }
+
+    th {
+      font-weight: 600;
+      color: #6b9e83;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    tr:hover {
+      background-color: rgba(0, 255, 0, 0.05);
+    }
+
+    /* Impact Stats */
+    .stat-card {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      color: #6b9e83;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #999;
+    }
+
+    /* Category Colors */
+    .compostable-bg { background-color: rgba(16, 185, 129, 0.15); color: #bbf7d0; }
+    .recyclable-bg { background-color: rgba(14, 165, 233, 0.15); color: #bfefff; }
+    .reusable-bg { background-color: rgba(245, 158, 11, 0.15); color: #fde68a; }
+    .landfill-bg { background-color: rgba(244, 63, 94, 0.15); color: #ffb7c4; }
+
+    .result-badge {
+      background-color: rgba(0, 255, 0, 0.15);
+      border: 1px solid #6b9e83;
+      padding: 24px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .result-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .guidance-card {
+      background-color: #0d0d0d;
+      border: 1px solid #333;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+
+    .guidance-title {
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+
+    .guidance-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #f5f5f5;
+    }
+
+    /* Logo */
+    .logo {
+      padding: 24px;
+      border-bottom: 1px solid #333;
+      text-align: center;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: #6b9e83;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <div class="sidebar">
+    <!-- Logo -->
+    <div class="logo">
+      <div class="logo-text">Loopify</div>
+      <p class="text-muted text-xs mt-1">Sustainability Platform</p>
+      <!-- EcoPoints Badge -->
+      <div style="margin-top: 16px; background-color: rgba(0, 255, 0, 0.15); border: 1px solid #6b9e83; border-radius: 8px; padding: 12px; text-align: center;">
+        <p class="text-xs text-muted" style="margin-bottom: 4px;">EcoPoints</p>
+        <p id="app-ecopoints-balance" style="font-size: 24px; font-weight: bold; color: #6b9e83;">0</p>
+      </div>
+    </div>
+
+    <!-- Navigation Items -->
+    <div class="nav-section-title">CORE MODULES</div>
+
+    <div class="nav-item active" data-section="wastelens">
+      <i class="fas fa-camera" style="color: #6b9e83; margin-right: 8px;"></i>WasteLens
+    </div>
+
+    <div class="nav-item" data-section="returnbox">
+      <i class="fas fa-box" style="color: #6b9e83; margin-right: 8px;"></i>ReturnBox
+    </div>
+
+    <div class="nav-section-title">ADVANCED</div>
+
+    <div class="nav-item" data-section="materialbank">
+      <i class="fas fa-industry" style="color: #6b9e83; margin-right: 8px;"></i>MaterialBank
+    </div>
+
+    <div class="nav-section-title">REWARDS</div>
+
+    <div class="nav-item" data-section="thriftloop">
+      <i class="fas fa-gift" style="color: #6b9e83; margin-right: 8px;"></i>ThriftLoop
+    </div>
+
+    <div class="nav-section-title">INSIGHTS</div>
+
+    <div class="nav-item" data-section="impact">
+      <i class="fas fa-chart-line" style="color: #6b9e83; margin-right: 8px;"></i>Impact Dashboard
+    </div>
+
+    <div class="nav-section-title">RESOURCES</div>
+
+    <div class="nav-item" data-section="ar-education">
+      <i class="fas fa-graduation-cap" style="color: #6b9e83; margin-right: 8px;"></i>AR Education
+    </div>
+
+    <div class="nav-item" data-section="help">
+      <i class="fas fa-circle-question" style="color: #6b9e83; margin-right: 8px;"></i>Help & Docs
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- ===========================
+         SECTION 1: WASTELENS
+         =========================== -->
+    <section id="wastelens" class="section active">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-3">WasteLens</h1>
+        <p class="text-muted text-lg">
+          Intelligent waste classification powered by machine learning. Get instant classification, confidence scores, and actionable disposal guidance.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Controls -->
+        <div class="card-premium">
+          <h2 class="text-xl font-semibold mb-6">Scan Waste</h2>
+
+          <!-- Input Mode Toggle -->
+          <div class="mb-6">
+            <label class="block text-sm font-medium mb-3">Input Method</label>
+            <div class="input-mode-toggle">
+              <button class="input-mode-btn active" data-mode="camera">📷 Camera</button>
+              <button class="input-mode-btn" data-mode="upload">📁 Upload</button>
+              <button class="input-mode-btn" data-mode="file">💾 File</button>
+            </div>
+          </div>
+
+          <!-- Camera Mode -->
+          <div id="cameraMode" class="space-y-4">
+            <div class="preview-container" id="cameraPreview">
+              <video id="videoFeed" style="display: none;"></video>
+              <div id="noCameraMsg" class="text-center text-muted">
+                <p style="font-size: 32px; margin-bottom: 8px;">📷</p>
+                <p>Click to enable camera</p>
+              </div>
+            </div>
+            <button id="startCameraBtn" class="button-primary w-full">Start Camera</button>
+            <button id="captureBtn" class="button-secondary w-full" style="display: none;">Capture Frame</button>
+          </div>
+
+          <!-- Upload Mode -->
+          <div id="uploadMode" style="display: none;" class="space-y-4">
+            <div class="preview-container" id="uploadPreview">
+              <img id="uploadImg" style="display: none;" />
+              <div id="uploadPlaceholder" class="text-center text-muted">
+                <p style="font-size: 32px; margin-bottom: 8px;">🖼️</p>
+                <p>Click to select image</p>
+              </div>
+            </div>
+            <input id="galleryInput" type="file" accept="image/*" class="hidden-file-input" />
+            <button id="selectGalleryBtn" class="button-primary w-full">Select from Gallery</button>
+          </div>
+
+          <!-- File Mode -->
+          <div id="fileMode" style="display: none;" class="space-y-4">
+            <div class="preview-container" id="filePreview">
+              <img id="fileImg" style="display: none;" />
+              <div id="filePlaceholder" class="text-center text-muted">
+                <p style="font-size: 32px; margin-bottom: 8px;">💾</p>
+                <p>Click to browse files</p>
+              </div>
+            </div>
+            <input id="fileInput" type="file" accept="image/*" class="hidden-file-input" />
+            <button id="selectFileBtn" class="button-primary w-full">Browse Files</button>
+          </div>
+
+          <!-- Scan Button -->
+          <div class="flex gap-3 mt-6 border-t border-gray-800 pt-6">
+            <button id="scanBtn" class="button-primary flex-1" disabled>
+              <span id="scanBtnText">Scan Waste</span>
+              <span id="scanSpinner" class="spinner" style="display: none; margin-left: 8px;"></span>
+            </button>
+            <button id="clearBtn" class="button-secondary flex-1">Clear</button>
+          </div>
+
+          <p class="text-xs text-muted mt-4 p-3 bg-gray-900/50 rounded-lg">
+            💡 Tip: Ensure good lighting and clear view of waste item.
+          </p>
+        </div>
+
+        <!-- Results -->
+        <div>
+          <div id="resultSection" style="display: none;">
+            <div class="result-badge">
+              <div style="font-size: 48px; margin-bottom: 12px;" id="resultIcon">🗑️</div>
+              <div id="resultCategory" class="result-title sage-accent">Category</div>
+              <div id="resultSubtitle" class="text-sm text-muted">Classification result</div>
+            </div>
+
+            <div class="card-premium">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-sm font-medium">Confidence</span>
+                <span id="confidencePercent" class="badge-sage">85%</span>
+              </div>
+              <div class="confidence-bar">
+                <div id="confidenceFill" class="confidence-fill" style="width: 85%;"></div>
+              </div>
+            </div>
+
+            <div class="guidance-card">
+              <div class="guidance-title">Disposal Guidance</div>
+              <p id="guidanceText" class="guidance-text">Follow local guidelines</p>
+            </div>
+
+            <div class="guidance-card">
+              <div class="guidance-title">Environmental Impact</div>
+              <p id="impactText" class="guidance-text">Every choice matters</p>
+            </div>
+
+            <div class="guidance-card">
+              <div class="guidance-title">Why This Result?</div>
+              <p id="reasonText" class="guidance-text text-xs">Classification details</p>
+            </div>
+          </div>
+
+          <div id="emptyState" class="card-premium text-center py-12">
+            <div style="font-size: 64px; margin-bottom: 16px;">🌱</div>
+            <h3 class="text-lg font-semibold mb-2">Ready to Classify</h3>
+            <p class="text-muted">Upload an image or capture a photo to get instant waste classification.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div class="card-premium mt-8">
+        <h3 class="text-lg font-semibold mb-4">💡 Classification Categories</h3>
+        <div class="grid md:grid-cols-4 gap-4">
+          <div>
+            <h4 class="font-medium text-sm mb-2 sage-accent">🌱 Compostable</h4>
+            <p class="text-xs text-muted">Food scraps, organic materials, yard waste.</p>
+          </div>
+          <div>
+            <h4 class="font-medium text-sm mb-2 sage-accent">♻️ Recyclable</h4>
+            <p class="text-xs text-muted">Paper, glass, metal, and plastics.</p>
+          </div>
+          <div>
+            <h4 class="font-medium text-sm mb-2 sage-accent">🔁 Reusable</h4>
+            <p class="text-xs text-muted">Items suitable for reuse or donation.</p>
+          </div>
+          <div>
+            <h4 class="font-medium text-sm mb-2 sage-accent">🗑️ Landfill</h4>
+            <p class="text-xs text-muted">Items requiring standard disposal.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===========================
+         SECTION 3: RETURNBOX
+         =========================== -->
+    <section id="returnbox" class="section">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-3">♻️ ReturnBox — Donate & Earn EcoPoints</h1>
+        <p class="text-muted text-lg">Return items for reuse. Every donation earns you +20 EcoPoints and enrolls you in collection drives.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Return Form (Enhanced) -->
+        <div class="card-premium md:col-span-2">
+          <h2 class="text-xl font-semibold mb-6">📦 Submit Return/Donation</h2>
+          <form id="returnbox-form" class="space-y-5">
+            <div>
+              <label class="block text-sm font-medium mb-2">Item Name/Description</label>
+              <input type="text" id="return-item-name" class="input-premium w-full" placeholder="e.g., Laptop, Box of Books, Clothes" required />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-2">Category</label>
+                <select id="return-category" class="select-premium w-full" required>
+                  <option value="">Select category</option>
+                  <option value="electronics">Electronics</option>
+                  <option value="furniture">Furniture</option>
+                  <option value="clothing">Clothing</option>
+                  <option value="books">Books</option>
+                  <option value="home-goods">Home Goods</option>
+                  <option value="sports">Sports & Outdoors</option>
+                  <option value="toys">Toys & Games</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2">Quantity</label>
+                <input type="number" id="return-quantity" class="input-premium w-full" min="1" value="1" required />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2">Condition</label>
+              <select id="return-condition" class="select-premium w-full" required>
+                <option value="">Select condition</option>
+                <option value="like-new">Like New (90-100% condition)</option>
+                <option value="excellent">Excellent (75-89% condition)</option>
+                <option value="good">Good (50-74% condition)</option>
+                <option value="fair">Fair (25-49% condition)</option>
+                <option value="working">Working (but needs repair)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2">Additional Notes (Optional)</label>
+              <textarea id="return-notes" class="input-premium w-full" placeholder="Any damage, missing parts, or special instructions..." rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="button-primary w-full text-lg py-3">
+              <i class="fas fa-check-circle mr-2"></i>Submit Donation & Earn EcoPoints
+            </button>
+          </form>
+        </div>
+
+        <!-- Reward Info Card -->
+        <div class="card-premium">
+          <h2 class="text-xl font-semibold mb-4">🌱 Reward Breakdown</h2>
+          <div class="space-y-4">
+            <div class="bg-sage-accent bg-opacity-10 border border-sage-accent rounded-lg p-4">
+              <p class="text-sm text-muted mb-1">Base Reward</p>
+              <p class="text-3xl font-bold sage-accent">+20 Points</p>
+              <p class="text-xs text-muted mt-1">Per item returned</p>
+            </div>
+
+            <div class="bg-sage-accent bg-opacity-10 border border-sage-accent rounded-lg p-4">
+              <p class="text-sm text-muted mb-1">Condition Bonus</p>
+              <div class="text-xs text-muted space-y-1 mt-2">
+                <p><strong>Like New:</strong> +5 bonus</p>
+                <p><strong>Excellent:</strong> +3 bonus</p>
+                <p><strong>Good:</strong> No bonus</p>
+              </div>
+            </div>
+
+            <div class="bg-sage-accent bg-opacity-10 border border-sage-accent rounded-lg p-4">
+              <p class="text-sm text-muted mb-1">Bulk Reward</p>
+              <p class="text-xs text-muted mt-2">+2 extra points per quantity over 1</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Returns History -->
+      <div class="card-premium mt-8">
+        <h2 class="text-xl font-semibold mb-4">📋 Your Return History</h2>
+        <div id="returnbox-history" class="space-y-3">
+          <p class="text-muted text-sm italic">No returns yet. Submit your first donation above!</p>
+        </div>
+      </div>
+
+      <!-- Collection Drive Integration Info -->
+      <div class="card-premium mt-8">
+        <h2 class="text-xl font-semibold mb-4">🚛 Collection Drive Integration</h2>
+        <p class="text-muted mb-6">Every return automatically enrolls you in our circular collection drive system:</p>
+        <div class="grid md:grid-cols-2 gap-6 text-sm">
+          <div class="flex gap-3">
+            <span class="sage-accent text-lg flex-shrink-0">✓</span>
+            <div>
+              <h4 class="font-semibold mb-1 sage-accent">Automatic Hub Selection</h4>
+              <p class="text-muted">Nearest hub automatically selected (2-15 km distance)</p>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <span class="sage-accent text-lg flex-shrink-0">✓</span>
+            <div>
+              <h4 class="font-semibold mb-1 sage-accent">3-Day Collection Cycle</h4>
+              <p class="text-muted">Scheduled collection drives every 3 days at each hub</p>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <span class="sage-accent text-lg flex-shrink-0">✓</span>
+            <div>
+              <h4 class="font-semibold mb-1 sage-accent">Two Fulfillment Options</h4>
+              <p class="text-muted">Choose Collection Pickup or Self Drop-Off for each item</p>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <span class="sage-accent text-lg flex-shrink-0">✓</span>
+            <div>
+              <h4 class="font-semibold mb-1 sage-accent">Duplicate Prevention</h4>
+              <p class="text-muted">Each return gets unique transaction ID to prevent duplicate rewards</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid md:grid-cols-4 gap-4 mt-8">
+        <div class="stat-card">
+          <div class="stat-number" id="return-count">0</div>
+          <div class="stat-label">Total Returns</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="return-points-earned">0</div>
+          <div class="stat-label">Points Earned</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="return-items-collected">0</div>
+          <div class="stat-label">Items Collected</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="return-hubs-used">0</div>
+          <div class="stat-label">Hubs Used</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===========================
+         SECTION 4: MATERIALBANK
+         =========================== -->
+    <section id="materialbank" class="section">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-3">🏭 MaterialBank — Industrial Reuse Marketplace</h1>
+        <p class="text-muted text-lg">List materials and waste for reuse. Earn EcoPoints based on material type and quantity.</p>
+      </div>
+
+      <!-- MaterialBank Tabs -->
+      <div class="flex gap-4 mb-8 border-b border-gray-700">
+        <button class="tab-btn active" data-tab="free-version" style="padding: 12px 24px; color: #6b9e83; border-bottom: 3px solid #6b9e83; background: none; border: none; cursor: pointer; font-weight: 600;">
+          📦 Free - List Material
+        </button>
+        <button class="tab-btn" data-tab="premium-version" style="padding: 12px 24px; color: #999; border-bottom: 3px solid transparent; background: none; border: none; cursor: pointer; font-weight: 600;">
+          ⭐ Premium - Request Material
+        </button>
+      </div>
+
+      <!-- FREE VERSION: List Material -->
+      <div id="free-version" class="tab-content">
+        <div class="grid md:grid-cols-3 gap-8">
+          <!-- Material Listing Form (Enhanced) -->
+          <div class="card-premium md:col-span-2">
+            <h2 class="text-xl font-semibold mb-6">📊 List Material for Reuse</h2>
+            <form id="materialbank-form" class="space-y-5">
+              <div>
+                <label class="block text-sm font-medium mb-2">Material Name/Description</label>
+                <input type="text" id="material-name" class="input-premium w-full" placeholder="e.g., Steel Scraps, Plastic Pellets, Glass Shards" required />
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2">Material Category</label>
+                  <select id="material-category" class="select-premium w-full" required>
+                    <option value="">Select category</option>
+                    <option value="metal">Metal (High Value)</option>
+                    <option value="plastic">Plastic (Medium Value)</option>
+                    <option value="glass">Glass (Medium Value)</option>
+                    <option value="paper">Paper/Cardboard (Low Value)</option>
+                    <option value="organic">Organic/Compost (Low Value)</option>
+                    <option value="electronic">Electronic Waste (High Value)</option>
+                    <option value="textile">Textile/Fabric (Medium Value)</option>
+                    <option value="wood">Wood/Timber (Medium Value)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Quantity (kg)</label>
+                  <input type="number" id="material-quantity" class="input-premium w-full" min="1" placeholder="e.g., 100" required />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-2">Quality Grade</label>
+                <select id="material-quality" class="select-premium w-full" required>
+                  <option value="">Select quality</option>
+                  <option value="premium">Premium (Clean, sorted)</option>
+                  <option value="standard">Standard (Mixed, usable)</option>
+                  <option value="economy">Economy (Requires processing)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-2">Additional Details (Optional)</label>
+                <textarea id="material-notes" class="input-premium w-full" placeholder="Composition, purity, packaging, storage conditions..." rows="3"></textarea>
+              </div>
+
+              <button type="submit" class="button-primary w-full text-lg py-3">
+                <i class="fas fa-list mr-2"></i>List Material & Calculate Rewards
+              </button>
+            </form>
+          </div>
+
+          <!-- Points Calculator Card -->
+          <div class="card-premium">
+            <h2 class="text-xl font-semibold mb-4">🌱 Points Calculator</h2>
+            <div class="space-y-4 text-sm">
+              <div class="bg-sage-accent bg-opacity-10 border border-sage-accent rounded-lg p-3">
+                <p class="text-muted mb-1">Metal (Electronic Waste)</p>
+                <p class="text-lg font-bold sage-accent">+1 pt/kg</p>
+              </div>
+
+              <div class="bg-sage-accent bg-opacity-10 border border-sage-accent rounded-lg p-3">
+                <p class="text-muted mb-1">Plastic, Glass, Textile</p>
+                <p class="text-lg font-bold sage-accent">+0.5 pt/kg</p>
+              </div>
+
+              <div class="bg-sage-accent bg-opacity-10 border border-sage-accent rounded-lg p-3">
+                <p class="text-muted mb-1">Paper, Organic</p>
+                <p class="text-lg font-bold sage-accent">+0.25 pt/kg</p>
+              </div>
+
+              <div class="bg-sage-accent bg-opacity-10 border border-sage-accent rounded-lg p-3">
+                <p class="text-muted mb-1">Quality Bonus</p>
+                <p class="text-xs text-muted mt-1">Premium: +20%, Standard: +10%</p>
+              </div>
+
+              <div class="bg-green-900 bg-opacity-20 border border-green-600 rounded-lg p-3">
+                <p class="text-muted mb-1">Your Reward</p>
+                <p class="text-2xl font-bold text-green-400" id="material-points-preview">0 Points</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Material Records/History (Free) -->
+        <div class="card-premium mt-8">
+          <h2 class="text-xl font-semibold mb-4">📝 Material Listings Record</h2>
+          <div id="materialbank-records" class="space-y-3">
+            <p class="text-muted text-sm italic">No materials listed yet. Submit your first listing above!</p>
+          </div>
+        </div>
+
+        <!-- Collection & Logistics (Free) -->
+        <div class="card-premium mt-8">
+          <h2 class="text-xl font-semibold mb-4">🚛 Collection & Logistics</h2>
+          <p class="text-muted mb-6">Materials are integrated with our collection drive system for seamless pickup:</p>
+          <div class="grid md:grid-cols-2 gap-6 text-sm">
+            <div class="flex gap-3">
+              <span class="sage-accent text-lg flex-shrink-0">✓</span>
+              <div>
+                <h4 class="font-semibold mb-1 sage-accent">Smart Hub Routing</h4>
+                <p class="text-muted">Materials automatically routed to nearest hub (2-15 km away)</p>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <span class="sage-accent text-lg flex-shrink-0">✓</span>
+              <div>
+                <h4 class="font-semibold mb-1 sage-accent">3-Day Collection Cycle</h4>
+                <p class="text-muted">Fixed collection drives every 3 days at each hub</p>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <span class="sage-accent text-lg flex-shrink-0">✓</span>
+              <div>
+                <h4 class="font-semibold mb-1 sage-accent">Two Fulfillment Options</h4>
+                <p class="text-muted">You choose: Collection Pickup or Self Drop-Off</p>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <span class="sage-accent text-lg flex-shrink-0">✓</span>
+              <div>
+                <h4 class="font-semibold mb-1 sage-accent">Duplicate Prevention</h4>
+                <p class="text-muted">Each listing gets unique tracking ID with timestamp</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid md:grid-cols-4 gap-4 mt-8">
+          <div class="stat-card">
+            <div class="stat-number" id="material-count">0</div>
+            <div class="stat-label">Total Listings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="material-kg">0</div>
+            <div class="stat-label">kg Listed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="material-points">0</div>
+            <div class="stat-label">Points Earned</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="material-hubs-used">0</div>
+            <div class="stat-label">Hubs Used</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREMIUM VERSION: Request Material -->
+      <div id="premium-version" class="tab-content" style="display: none;">
+        <div class="grid md:grid-cols-3 gap-8">
+          <!-- Material Request Form (Premium Feature) -->
+          <div class="card-premium md:col-span-2">
+            <h2 class="text-xl font-semibold mb-6">🔍 Request Materials from Suppliers</h2>
+            <p class="text-muted mb-6">Premium Feature: Post your material requirements and get connected with suppliers.</p>
+            <form id="request-material-form" class="space-y-5">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2">Material You're Looking For</label>
+                  <input type="text" id="request-material" class="input-premium w-full" placeholder="e.g., Steel scraps, Plastic pellets" required />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Target Quantity (kg)</label>
+                  <input type="number" id="request-quantity" class="input-premium w-full" min="1" placeholder="e.g., 500" required />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2">Quality Grade Needed</label>
+                  <select id="request-quality" class="select-premium w-full" required>
+                    <option value="">Select quality</option>
+                    <option value="premium">Premium (High purity, sorted)</option>
+                    <option value="standard">Standard (General use)</option>
+                    <option value="economy">Economy (Flexible specs)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Budget (EcoPoints or $)</label>
+                  <input type="text" id="request-budget" class="input-premium w-full" placeholder="e.g., 500 pts or $1000" required />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-2">Delivery Location</label>
+                <input type="text" id="request-location" class="input-premium w-full" placeholder="City/Area" required />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-2">Additional Requirements</label>
+                <textarea id="request-notes" class="input-premium w-full" placeholder="Delivery timeline, packaging, certifications needed..." rows="3"></textarea>
+              </div>
+
+              <button type="submit" class="button-primary w-full text-lg py-3">
+                <i class="fas fa-search mr-2"></i>Post Material Request
+              </button>
+            </form>
+          </div>
+
+          <!-- Premium Info Card -->
+          <div class="card-premium">
+            <h2 class="text-xl font-semibold mb-4">⭐ Premium Benefits</h2>
+            <div class="space-y-4 text-sm">
+              <div class="bg-amber-900 bg-opacity-20 border border-amber-700 rounded-lg p-3">
+                <p class="text-muted mb-1">📊 Supplier Network</p>
+                <p class="text-sm">Connect with verified industrial suppliers</p>
+              </div>
+
+              <div class="bg-amber-900 bg-opacity-20 border border-amber-700 rounded-lg p-3">
+                <p class="text-muted mb-1">⚡ Priority Matching</p>
+                <p class="text-sm">Your requests get priority visibility</p>
+              </div>
+
+              <div class="bg-amber-900 bg-opacity-20 border border-amber-700 rounded-lg p-3">
+                <p class="text-muted mb-1">🎯 Bulk Orders</p>
+                <p class="text-sm">Access bulk pricing and contracts</p>
+              </div>
+
+              <div class="bg-amber-900 bg-opacity-20 border border-amber-700 rounded-lg p-3">
+                <p class="text-muted mb-1">📋 Request History</p>
+                <p class="text-sm">Track all your material requests</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Requests -->
+        <div class="card-premium mt-8">
+          <h3 class="text-lg font-semibold mb-4">📋 Your Active Requests</h3>
+          <div id="request-records" class="space-y-3">
+            <p class="text-muted text-sm italic">No active requests yet. Post your first request above!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===========================
+         SECTION 5: THRIFTLOOP
+         =========================== -->
+    <section id="thriftloop" class="section">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-3">ThriftLoop Redemption</h1>
+        <p class="text-muted text-lg">Redeem your EcoPoints for sustainable pre-loved items and circular goods.</p>
+      </div>
+
+      <!-- ThriftLoop Embedded -->
+      <iframe id="thriftloop-frame" src="thriftloop.html" style="width: 100%; height: 1200px; border: none; border-radius: 12px; background: rgba(0, 255, 0, 0.1);"></iframe>
+    </section>
+
+    <!-- ===========================
+         SECTION 6: IMPACT DASHBOARD
+         =========================== -->
+    <section id="impact" class="section">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-3">Impact Dashboard</h1>
+        <p class="text-muted text-lg">Track your environmental impact across all modules.</p>
+      </div>
+
+      <!-- Referral Code Widget -->
+      <div class="card-premium mb-8" style="background: linear-gradient(135deg, rgba(0, 255, 0, 0.1) 0%, rgba(0, 255, 0, 0.05) 100%); border: 2px solid #6b9e83;">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-2xl font-bold mb-2">🌱 Your Referral Code</h3>
+            <p class="text-muted mb-4">Share this code and earn 10 EcoPoints. Your friend gets 30! (Updates with your progress)</p>
+          </div>
+          <div style="text-align: right;">
+            <div id="referral-code-display" class="text-4xl font-bold text-sage-accent" style="font-family: 'Monaco', 'Courier New', monospace;">LOOP-XXXX</div>
+            <p class="text-sm text-muted mt-2">Unique to you</p>
+          </div>
+        </div>
+        <div class="mt-4 flex gap-3">
+          <button id="copy-referral-code" class="button-primary" style="flex: 1;">
+            <i class="fas fa-copy" style="margin-right: 8px;"></i>Copy Code
+          </button>
+          <button id="share-referral" class="button-secondary" style="flex: 1;">
+            <i class="fas fa-share" style="margin-right: 8px;"></i>Share Link
+          </button>
+        </div>
+      </div>
+
+      <!-- Key Metrics -->
+      <div class="grid md:grid-cols-4 gap-4 mb-8">
+        <div class="stat-card">
+          <div class="stat-number" id="metric-waste-diverted">0</div>
+          <div class="stat-label">Items Classified</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="metric-food-saved">0</div>
+          <div class="stat-label">Foods Tracked</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="metric-items-reused">0</div>
+          <div class="stat-label">Items Reused</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="metric-materials-matched">0</div>
+          <div class="stat-label">Materials Matched</div>
+        </div>
+      </div>
+
+      <!-- Level Integration Breakdown -->
+      <div class="grid md:grid-cols-5 gap-4 mb-8">
+        <div class="card-premium" style="text-align: center; border: 2px solid #6b9e83;">
+          <h4 class="text-sm font-bold text-sage-accent mb-2">Level 1</h4>
+          <p class="text-2xl font-bold" id="level1-count">0</p>
+          <p class="text-xs text-muted">WasteLens</p>
+        </div>
+        <div class="card-premium" style="text-align: center; border: 2px solid #6b9e83;">
+          <h4 class="text-sm font-bold text-sage-accent mb-2">Level 2</h4>
+          <p class="text-2xl font-bold" id="level2-count">0</p>
+          <p class="text-xs text-muted">ShelfLife AI</p>
+        </div>
+        <div class="card-premium" style="text-align: center; border: 2px solid #6b9e83;">
+          <h4 class="text-sm font-bold text-sage-accent mb-2">Level 3</h4>
+          <p class="text-2xl font-bold" id="level3-count">0</p>
+          <p class="text-xs text-muted">Reuse Loop</p>
+        </div>
+        <div class="card-premium" style="text-align: center; border: 2px solid #6b9e83;">
+          <h4 class="text-sm font-bold text-sage-accent mb-2">Level 4</h4>
+          <p class="text-2xl font-bold" id="level4-count">0</p>
+          <p class="text-xs text-muted">Material Bank</p>
+        </div>
+        <div class="card-premium" style="text-align: center; border: 2px solid #6b9e83;">
+          <h4 class="text-sm font-bold text-sage-accent mb-2">Level 5</h4>
+          <p class="text-2xl font-bold" id="level5-count">0</p>
+          <p class="text-xs text-muted">Return Box</p>
+        </div>
+      </div>
+
+      <!-- Impact Summary -->
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="card-premium">
+          <h3 class="text-lg font-semibold mb-4 sage-accent">Waste Diversion Breakdown</h3>
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="text-sm">Composted</span>
+                <span class="text-sm font-medium" id="compost-count">0</span>
+              </div>
+              <div class="h-2 bg-gray-800 rounded">
+                <div id="compost-bar" class="h-2 bg-green-500 rounded" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="text-sm">Recycled</span>
+                <span class="text-sm font-medium" id="recycle-count">0</span>
+              </div>
+              <div class="h-2 bg-gray-800 rounded">
+                <div id="recycle-bar" class="h-2 bg-blue-500 rounded" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="text-sm">Reused</span>
+                <span class="text-sm font-medium" id="reuse-count-impact">0</span>
+              </div>
+              <div class="h-2 bg-gray-800 rounded">
+                <div id="reuse-bar" class="h-2 bg-amber-500 rounded" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="text-sm">Landfill</span>
+                <span class="text-sm font-medium" id="landfill-count">0</span>
+              </div>
+              <div class="h-2 bg-gray-800 rounded">
+                <div id="landfill-bar" class="h-2 bg-red-500 rounded" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-premium">
+          <h3 class="text-lg font-semibold mb-4 sage-accent">Environmental Benefits</h3>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-3">
+              <span class="sage-accent">✓</span>
+              <span>Methane emissions prevented: <strong id="methane-prevented">0</strong> kg CO₂e</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="sage-accent">✓</span>
+              <span>Resources conserved: <strong id="resources-saved">0</strong> kg</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="sage-accent">✓</span>
+              <span>Landfill space preserved: <strong id="landfill-space">0</strong> m³</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="sage-accent">✓</span>
+              <span>Carbon footprint reduced: <strong id="carbon-reduced">0</strong> kg CO₂</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Education -->
+      <div class="card-premium mt-8">
+        <h3 class="text-lg font-semibold mb-4">🌍 Why This Matters</h3>
+        <div class="grid md:grid-cols-2 gap-6 text-sm">
+          <div>
+            <h4 class="font-semibold sage-accent mb-2">Waste Prevention</h4>
+            <p class="text-muted">By preventing waste before it happens, you eliminate the need for disposal entirely. Food tracking and prevention is 100x more impactful than recycling.</p>
+          </div>
+          <div>
+            <h4 class="font-semibold sage-accent mb-2">Circular Economy</h4>
+            <p class="text-muted">Matching waste with reusers keeps materials in productive cycles. One person's waste becomes another's resource, eliminating extraction.</p>
+          </div>
+          <div>
+            <h4 class="font-semibold sage-accent mb-2">Climate Impact</h4>
+            <p class="text-muted">Landfill decomposition produces methane—a potent greenhouse gas. Proper waste management directly reduces your carbon footprint.</p>
+          </div>
+          <div>
+            <h4 class="font-semibold sage-accent mb-2">Community Effect</h4>
+            <p class="text-muted">Your individual actions compound. When millions adopt circular practices, we transform industrial systems toward sustainability.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===========================
+         SECTION 6: AR EDUCATION
+         =========================== -->
+    <section id="ar-education" class="section">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-3">AR Education</h1>
+        <p class="text-muted text-lg">Learn about sustainable waste management through interactive augmented reality experiences.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- AR Learning Modules -->
+        <div class="card-premium">
+          <h2 class="text-xl font-semibold mb-6">Learning Modules</h2>
+          <div class="space-y-4">
+            <div class="bg-black/50 rounded-lg p-4 border border-gray-800 cursor-pointer hover:border-sage-accent transition">
+              <div style="font-size: 24px; margin-bottom: 8px;">🌱</div>
+              <h3 class="font-semibold mb-2">Composting Basics</h3>
+              <p class="text-sm text-muted">Understand what can be composted and how decomposition works through AR visualization.</p>
+              <a href="ar-education.html?module=composting" class="button-secondary w-full mt-4 text-center block">Launch AR</a>
+            </div>
+
+            <div class="bg-black/50 rounded-lg p-4 border border-gray-800 cursor-pointer hover:border-sage-accent transition">
+              <div style="font-size: 24px; margin-bottom: 8px;">♻️</div>
+              <h3 class="font-semibold mb-2">Recycling Guide</h3>
+              <p class="text-sm text-muted">Interactive material identification and proper recycling procedures with real-time AR detection.</p>
+              <a href="ar-education.html?module=recycling" class="button-secondary w-full mt-4 text-center block">Launch AR</a>
+            </div>
+
+            <div class="bg-black/50 rounded-lg p-4 border border-gray-800 cursor-pointer hover:border-sage-accent transition">
+              <div style="font-size: 24px; margin-bottom: 8px;">🔄</div>
+              <h3 class="font-semibold mb-2">Circular Economy</h3>
+              <p class="text-sm text-muted">See how waste becomes resources in a circular system. Interactive supply chain visualization.</p>
+              <a href="ar-education.html?module=circular" class="button-secondary w-full mt-4 text-center block">Launch AR</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats & Progress -->
+        <div>
+          <div class="card-premium mb-6">
+            <h3 class="text-lg font-semibold mb-4 sage-accent">Your Learning Progress</h3>
+            <div class="space-y-4">
+              <div>
+                <div class="flex justify-between mb-2">
+                  <span class="text-sm">Composting Basics</span>
+                  <span class="text-sm font-medium sage-accent">100%</span>
+                </div>
+                <div class="h-2 bg-gray-800 rounded">
+                  <div class="h-2 bg-green-500 rounded" style="width: 100%;"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between mb-2">
+                  <span class="text-sm">Recycling Guide</span>
+                  <span class="text-sm font-medium sage-accent">60%</span>
+                </div>
+                <div class="h-2 bg-gray-800 rounded">
+                  <div class="h-2 bg-blue-500 rounded" style="width: 60%;"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between mb-2">
+                  <span class="text-sm">Circular Economy</span>
+                  <span class="text-sm font-medium sage-accent">30%</span>
+                </div>
+                <div class="h-2 bg-gray-800 rounded">
+                  <div class="h-2 bg-amber-500 rounded" style="width: 30%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-premium">
+            <h3 class="text-lg font-semibold mb-4 sage-accent">🏆 Your Badges</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="text-center p-4 bg-black/50 rounded-lg border border-gray-800">
+                <div style="font-size: 32px; margin-bottom: 8px;">🏆</div>
+                <p class="text-xs font-semibold">Waste Warrior</p>
+                <p class="text-xs text-muted mt-1">10 scans</p>
+              </div>
+              <div class="text-center p-4 bg-black/50 rounded-lg border border-gray-800">
+                <div style="font-size: 32px; margin-bottom: 8px;">🌍</div>
+                <p class="text-xs font-semibold">Earth Guardian</p>
+                <p class="text-xs text-muted mt-1">Zero Waste Day</p>
+              </div>
+              <div class="text-center p-4 bg-black/50 rounded-lg border border-gray-800 opacity-50">
+                <div style="font-size: 32px; margin-bottom: 8px;">🚀</div>
+                <p class="text-xs font-semibold">Sustainability Expert</p>
+                <p class="text-xs text-muted mt-1">Unlock Soon</p>
+              </div>
+              <div class="text-center p-4 bg-black/50 rounded-lg border border-gray-800 opacity-50">
+                <div style="font-size: 32px; margin-bottom: 8px;">💚</div>
+                <p class="text-xs font-semibold">Conservation Hero</p>
+                <p class="text-xs text-muted mt-1">Unlock Soon</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced AR Features -->
+      <div class="card-premium mt-8">
+        <h3 class="text-lg font-semibold mb-4">📱 Advanced AR Features</h3>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div>
+            <h4 class="font-semibold text-sm mb-2 sage-accent">Real-Time Detection</h4>
+            <p class="text-xs text-muted">Point your camera at any item to instantly identify its waste category and get recycling guidance.</p>
+          </div>
+          <div>
+            <h4 class="font-semibold text-sm mb-2 sage-accent">3D Visualization</h4>
+            <p class="text-xs text-muted">Explore 3D models of waste items in different decomposition stages and see environmental impact.</p>
+          </div>
+          <div>
+            <h4 class="font-semibold text-sm mb-2 sage-accent">Interactive Lessons</h4>
+            <p class="text-xs text-muted">Complete interactive scenarios to learn proper waste sorting and environmental best practices.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===========================
+         SECTION 7: HELP & DOCS
+         =========================== -->
+    <section id="help" class="section">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-3">Help & Documentation</h1>
+        <p class="text-muted text-lg">Learn how to use Loopify effectively.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="card-premium">
+          <h3 class="text-lg font-semibold mb-4">🎯 Getting Started</h3>
+          <div class="space-y-4 text-sm">
+            <div>
+              <h4 class="font-semibold mb-2">1. WasteLens</h4>
+              <p class="text-muted">Take or upload a photo of waste. Our ML model instantly classifies it into 4 categories and provides disposal guidance.</p>
+            </div>
+            <div>
+              <h4 class="font-semibold mb-2">2. ShelfLife</h4>
+              <p class="text-muted">Track food purchases and storage conditions. Get instant spoilage predictions and prevention recommendations.</p>
+            </div>
+            <div>
+              <h4 class="font-semibold mb-2">3. ReturnBox</h4>
+              <p class="text-muted">Monitor circular returns. Track items reused and measure your circular economy participation.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-premium">
+          <h3 class="text-lg font-semibold mb-4">📖 Features</h3>
+          <div class="space-y-3 text-sm">
+            <div>
+              <h4 class="font-semibold sage-accent">Real-Time Classification</h4>
+              <p class="text-muted">Camera, gallery, or file upload—instant results.</p>
+            </div>
+            <div>
+              <h4 class="font-semibold sage-accent">AI Powered</h4>
+              <p class="text-muted">Machine learning with 70-99% confidence scoring.</p>
+            </div>
+            <div>
+              <h4 class="font-semibold sage-accent">Local Data</h4>
+              <p class="text-muted">All your data stays on your device. No tracking, no uploads.</p>
+            </div>
+            <div>
+              <h4 class="font-semibold sage-accent">Impact Tracking</h4>
+              <p class="text-muted">See your environmental benefits in real-time.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-premium mt-8">
+        <h3 class="text-lg font-semibold mb-4">❓ FAQ</h3>
+        <div class="space-y-4 text-sm">
+          <div>
+            <h4 class="font-semibold mb-1">Is my data private?</h4>
+            <p class="text-muted">Yes. All processing happens on your device. No data is uploaded or shared.</p>
+          </div>
+          <div>
+            <h4 class="font-semibold mb-1">How accurate is the classification?</h4>
+            <p class="text-muted">70-99% depending on image quality. Always verify with local disposal guidelines.</p>
+          </div>
+          <div>
+            <h4 class="font-semibold mb-1">Can I use this offline?</h4>
+            <p class="text-muted">Yes. After initial load, you can use all features offline. Data syncs when reconnected.</p>
+          </div>
+          <div>
+            <h4 class="font-semibold mb-1">How do I export my data?</h4>
+            <p class="text-muted">All data is stored locally. You can access it anytime through your browser's local storage.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="news-api-integration.js"></script>
+  <script src="eco-loop-rag-kb.js"></script>
+  <script src="ecopoints-system.js"></script>
+  <script src="user-auth.js"></script>
+  <script src="streak-system.js"></script>
+  <script src="streak-widget.js"></script>
+  <script src="toast-notifications.js"></script>
+  <script src="loopify-chatbot.js"></script>
+  <script src="floating-chat-widget.js"></script>
+  <script src="webhook-integration.js"></script>
+  <script src="impact-analytics.js"></script>
+  <script src="platform-unified-app.js"></script>
+  
+  <!-- Initialize Referral Code Widget -->
+  <script>
+    // Generate referral code from user data
+    function generateReferralCode() {
+      const userId = localStorage.getItem('userId') || 'user';
+      const ecoPointsBalance = (typeof ecoPoints !== 'undefined') ? ecoPoints.getBalance() : 0;
+      
+      // Create code from first letters + points hash
+      const prefix = 'LOOP';
+      const hash = Math.abs(hashCode(userId + ecoPointsBalance)).toString(16).substring(0, 4).toUpperCase();
+      return `${prefix}-${hash}`;
+    }
+    
+    // Simple hash function
+    function hashCode(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return hash;
+    }
+    
+    // Update referral code display
+    function updateReferralCode() {
+      const referralCode = generateReferralCode();
+      const referralCodeDisplay = document.getElementById('referral-code-display');
+      
+      if (referralCodeDisplay) {
+        referralCodeDisplay.textContent = referralCode;
+        referralCodeDisplay.setAttribute('data-code', referralCode);
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initial update
+      updateReferralCode();
+      
+      // Update referral code every 1 second (when ecopoints change)
+      setInterval(updateReferralCode, 1000);
+      
+      // Bind copy button
+      const copyBtn = document.getElementById('copy-referral-code');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          const referralCode = document.getElementById('referral-code-display').getAttribute('data-code') || '123';
+          navigator.clipboard.writeText(referralCode).then(() => {
+            copyBtn.innerHTML = '<i class="fas fa-check" style="margin-right: 8px;"></i>Copied!';
+            setTimeout(() => {
+              copyBtn.innerHTML = '<i class="fas fa-copy" style="margin-right: 8px;"></i>Copy Code';
+            }, 2000);
+          });
+        });
+      }
+      
+      // Bind share button
+      const shareBtn = document.getElementById('share-referral');
+      if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+          const referralCode = document.getElementById('referral-code-display').getAttribute('data-code') || '123';
+          const shareText = `Join me on Loopify! Use my referral code: ${referralCode}`;
+          if (navigator.share) {
+            navigator.share({ title: 'Loopify Referral', text: shareText });
+          } else {
+            navigator.clipboard.writeText(shareText).then(() => {
+              alert('Share text copied: ' + shareText);
+            });
+          }
+        });
+      }
+    });
+  </script>
+  
+  <!-- Initialize Eco Loop Chatbot -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('✅ Eco Loop Chatbot initialized with RAG knowledge base');
+      
+      // Update EcoPoints balance in real-time
+      function updateEcoPointsDisplay() {
+        if (typeof ecoPoints !== 'undefined' && document.getElementById('app-ecopoints-balance')) {
+          const balance = ecoPoints.getBalance();
+          document.getElementById('app-ecopoints-balance').textContent = balance;
+        }
+      }
+      
+      // Update Impact Dashboard from all levels in real-time
+      function updateImpactDashboardRealtime() {
+        // Get all data from localStorage
+        const materials = JSON.parse(localStorage.getItem('materialbank_history') || '[]');
+        const returns = JSON.parse(localStorage.getItem('returnbox_history') || '[]');
+        
+        // Level 1: WasteLens - waste classification
+        const wasteLensData = JSON.parse(localStorage.getItem('wasteLens_data') || '{}');
+        const level1Count = wasteLensData.itemsClassified || 0;
+        
+        // Level 2: ShelfLife AI - food tracking
+        const shelfLifeData = JSON.parse(localStorage.getItem('shelflife_items_v1') || '[]');
+        const level2Count = shelfLifeData.length || 0;
+        
+        // Level 3: Reuse Loop - item reuse tracking
+        const reuseLogs = JSON.parse(localStorage.getItem('reuseLogs') || '[]');
+        const level3Count = reuseLogs.length || 0;
+        
+        // Level 4: Material Bank matching
+        const matchedMaterials = materials.filter(m => m.matched === true).length;
+        
+        // Level 5: Return Box categorization
+        const returnBoxData = returns.length;
+        
+        // Categorize returns by disposal method
+        let composted = 0, recycled = 0, reused = 0, landfill = 0;
+        returns.forEach(r => {
+          if (r.category === 'food' || r.category === 'organic') {
+            composted += r.quantity || 1;
+          } else if (r.category === 'plastic' || r.category === 'metal' || r.category === 'glass' || r.category === 'paper') {
+            recycled += r.quantity || 1;
+          } else if (r.condition === 'like_new' || r.condition === 'excellent' || r.condition === 'good') {
+            reused += r.quantity || 1;
+          } else {
+            landfill += r.quantity || 1;
+          }
+        });
+        
+        // Calculate totals
+        const totalMaterials = materials.reduce((sum, m) => sum + (m.quantity || 0), 0);
+        const totalItems = returns.length;
+        const totalClassified = level1Count + level2Count + level3Count + matchedMaterials + returnBoxData;
+        
+        // Impact calculations
+        const methanePrevent = Math.round((composted) * 0.05);
+        const resourcesSaved = Math.round((totalMaterials) * 1.2);
+        const landfillSpace = Math.round((totalMaterials + totalItems) * 0.003);
+        const carbonReduced = Math.round((totalMaterials + totalItems) * 0.08);
+        
+        // Update all dashboard metrics
+        const updates = {
+          'metric-waste-diverted': totalClassified,
+          'metric-food-saved': level2Count + composted,
+          'metric-items-reused': level3Count + reused,
+          'metric-materials-matched': matchedMaterials,
+          'compost-count': composted,
+          'recycle-count': recycled,
+          'reuse-count-impact': reused,
+          'landfill-count': landfill,
+          'methane-prevented': methanePrevent,
+          'resources-saved': resourcesSaved,
+          'landfill-space': landfillSpace,
+          'carbon-reduced': carbonReduced,
+          'level1-count': level1Count,
+          'level2-count': level2Count,
+          'level3-count': level3Count,
+          'level4-count': matchedMaterials,
+          'level5-count': returnBoxData
+        };
+
+        for (const [id, value] of Object.entries(updates)) {
+          const element = document.getElementById(id);
+          if (element) {
+            element.textContent = value;
+          }
+        }
+
+        // Update progress bars
+        const totalWaste = composted + recycled + reused + landfill;
+        if (totalWaste > 0) {
+          const compostBar = document.getElementById('compost-bar');
+          const recycleBar = document.getElementById('recycle-bar');
+          const reuseBar = document.getElementById('reuse-bar');
+          const landfillBar = document.getElementById('landfill-bar');
+          
+          if (compostBar) compostBar.style.width = `${(composted / totalWaste * 100)}%`;
+          if (recycleBar) recycleBar.style.width = `${(recycled / totalWaste * 100)}%`;
+          if (reuseBar) reuseBar.style.width = `${(reused / totalWaste * 100)}%`;
+          if (landfillBar) landfillBar.style.width = `${(landfill / totalWaste * 100)}%`;
+        }
+      }
+      
+      // Initial update
+      updateEcoPointsDisplay();
+      updateImpactDashboardRealtime();
+      
+      // Real-time sync every 500ms
+      setInterval(() => {
+        updateEcoPointsDisplay();
+        updateImpactDashboardRealtime();
+      }, 500);
+      
+      // Listen for storage changes from other tabs
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'balance' || e.key === 'eco_points_balance' || e.key === 'transactions' || 
+            e.key === 'materialbank_history' || e.key === 'returnbox_history' || 
+            e.key === 'shelflife_items_v1' || e.key === 'reuseLogs' || e.key === 'wasteLens_data') {
+          updateEcoPointsDisplay();
+          updateImpactDashboardRealtime();
+        }
+      });
+    });
+  </script>
+
+  <script>
+    // Periodically refresh the Impact Dashboard to reflect AR and app data
+    setInterval(() => {
+      if (typeof updateImpactDashboard === 'function') {
+        updateImpactDashboard();
+      }
+    }, 2000); // every 2 seconds
+  </script>
+  <!-- Collection Drive System (Embedded) -->
+  <script>
+    class CollectionDriveSystem {
+      constructor() {
+        this.hubsData = this.initializeHubs();
+        this.storageKey = 'collection_drives_transactions';
+      }
+
+      initializeHubs() {
+        return [
+          {
+            hubId: 'hub-001',
+            hubName: 'Downtown Circular Hub',
+            distanceKm: 2,
+            address: '123 Green Street, City Center',
+            lastCollectionDate: new Date(2026, 0, 28),
+            collectionTime: '10:00 AM - 6:00 PM',
+            capacity: 500,
+          },
+          {
+            hubId: 'hub-002',
+            hubName: 'Westside Community Hub',
+            distanceKm: 5,
+            address: '456 Eco Avenue, West District',
+            lastCollectionDate: new Date(2026, 0, 27),
+            collectionTime: '9:00 AM - 5:00 PM',
+            capacity: 350,
+          },
+          {
+            hubId: 'hub-003',
+            hubName: 'Eastside Material Exchange',
+            distanceKm: 8,
+            address: '789 Sustainability Drive, East Zone',
+            lastCollectionDate: new Date(2026, 0, 26),
+            collectionTime: '11:00 AM - 7:00 PM',
+            capacity: 600,
+          },
+          {
+            hubId: 'hub-004',
+            hubName: 'North Green Station',
+            distanceKm: 12,
+            address: '321 Circular Way, North Sector',
+            lastCollectionDate: new Date(2026, 0, 29),
+            collectionTime: '8:00 AM - 4:00 PM',
+            capacity: 400,
+          },
+          {
+            hubId: 'hub-005',
+            hubName: 'South Sustainability Center',
+            distanceKm: 15,
+            address: '654 Eco Path, South Region',
+            lastCollectionDate: new Date(2026, 0, 25),
+            collectionTime: '10:00 AM - 6:00 PM',
+            capacity: 450,
+          },
+        ];
+      }
+
+      getNearestHub() {
+        if (!this.hubsData || this.hubsData.length === 0) return null;
+        return this.hubsData.reduce((nearest, hub) => {
+          return hub.distanceKm < nearest.distanceKm ? hub : nearest;
+        });
+      }
+
+      calculateNextCollection(hub) {
+        if (!hub || !hub.lastCollectionDate) return null;
+
+        const lastDate = typeof hub.lastCollectionDate === 'string'
+          ? new Date(hub.lastCollectionDate)
+          : hub.lastCollectionDate;
+
+        const nextDate = new Date(lastDate);
+        nextDate.setDate(nextDate.getDate() + 3);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        nextDate.setHours(0, 0, 0, 0);
+
+        const daysRemaining = Math.max(0, Math.ceil((nextDate - today) / (1000 * 60 * 60 * 24)));
+
+        return {
+          nextDate: nextDate,
+          daysRemaining: daysRemaining,
+          dateString: this.formatDate(nextDate),
+          formattedText: `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} from today`,
+        };
+      }
+
+      formatDate(date) {
+        const options = { month: 'short', day: 'numeric', year: 'numeric' };
+        return date.toLocaleDateString('en-US', options);
+      }
+
+      recordTransaction(transaction) {
+        const transactions = this.getTransactionHistory();
+        transactions.push(transaction);
+        localStorage.setItem(this.storageKey, JSON.stringify(transactions));
+      }
+
+      getTransactionHistory() {
+        const data = localStorage.getItem(this.storageKey);
+        return data ? JSON.parse(data) : [];
+      }
+
+      isDuplicateTransaction(transactionId) {
+        const transactions = this.getTransactionHistory();
+        return transactions.some((t) => t.transactionId === transactionId);
+      }
+
+      storeFulfillmentChoice(fulfillmentData) {
+        try {
+          const allFulfillments = this.getFulfillmentHistory();
+          allFulfillments.push({
+            ...fulfillmentData,
+            timestamp: new Date().toISOString(),
+          });
+          localStorage.setItem('fulfillment_history', JSON.stringify(allFulfillments));
+          return true;
+        } catch (error) {
+          console.error('Error storing fulfillment choice:', error);
+          return false;
+        }
+      }
+
+      getFulfillmentHistory() {
+        const data = localStorage.getItem('fulfillment_history');
+        return data ? JSON.parse(data) : [];
+      }
+
+      completeFulfillment(params) {
+        const { transactionId, level, fulfillmentType, hubSelected, collectionDate, itemName } = params;
+
+        const fulfillmentData = {
+          transactionId,
+          level,
+          fulfillmentType,
+          hubSelected: hubSelected.hubId,
+          hubName: hubSelected.hubName,
+          collectionDate: collectionDate,
+          itemName: itemName,
+          address: hubSelected.address,
+          distanceKm: hubSelected.distanceKm,
+        };
+
+        this.storeFulfillmentChoice(fulfillmentData);
+        this.recordTransaction({
+          transactionId,
+          level,
+          pointsEarned: level === 3 ? 20 : 40,
+          timestamp: new Date().toISOString(),
+        });
+
+        return {
+          success: true,
+          message: `Fulfillment option saved: ${fulfillmentType}`,
+          data: fulfillmentData,
+        };
+      }
+    }
+
+    let collectionDriveSystem = new CollectionDriveSystem();
+    window.collectionDriveSystem = collectionDriveSystem;
+  </script>
+
+  <!-- Fulfillment Modal (Embedded) -->
+  <div id="fulfillment-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: linear-gradient(135deg, #000000 0%, #000000 100%); border: 1px solid rgba(0, 255, 0, 0.3); border-radius: 16px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); animation: slideUp 0.4s ease;">
+      <!-- Modal Header -->
+      <div style="padding: 24px 24px 16px; border-bottom: 1px solid rgba(0, 255, 0, 0.2); display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 20px; font-weight: 700; color: #6b9e83; margin: 0;">Choose Fulfillment</h2>
+        <button onclick="document.getElementById('fulfillment-modal').style.display='none'" style="background: transparent; border: none; color: #999; font-size: 24px; cursor: pointer;">×</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div style="padding: 24px;">
+        <div style="background: rgba(0, 255, 0, 0.1); border: 1px solid #6b9e83; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+          <div style="font-size: 24px; color: #6b9e83; flex-shrink: 0;">✓</div>
+          <p style="font-size: 14px; font-weight: 600; color: #a8d5ba; margin: 0;" id="ecopoints-message">+20 EcoPoints added!</p>
+        </div>
+
+        <!-- Hub Info -->
+        <div style="background: rgba(0, 255, 0, 0.05); border: 1px solid rgba(0, 255, 0, 0.2); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+          <h3 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #f5f5f5;">Next Collection Drive</h3>
+          <p style="margin: 8px 0; color: #a8d5ba; font-size: 14px; font-weight: 600;" id="hub-name">Downtown Hub</p>
+          <p style="margin: 8px 0; color: #6b9e83; font-size: 13px;" id="collection-schedule">Collection in 3 days (Feb 3)</p>
+        </div>
+
+        <!-- Options Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+          <!-- Pickup Option -->
+          <div onclick="handleFulfillmentChoice('pickup')" style="background: rgba(0, 0, 0, 0.5); border: 2px solid rgba(0, 255, 0, 0.2); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s ease;">
+            <div style="font-size: 28px; color: #6b9e83; margin-bottom: 8px;">🚚</div>
+            <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #f5f5f5;">Collection Pickup</h4>
+            <p style="margin: 0; color: #999; font-size: 12px;">We collect from your location</p>
+            <button onclick="event.stopPropagation(); confirmFulfillment('pickup')" style="margin-top: 12px; background: #6b9e83; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%;">Choose</button>
+          </div>
+
+          <!-- Self Drop Option -->
+          <div onclick="handleFulfillmentChoice('self-drop')" style="background: rgba(0, 0, 0, 0.5); border: 2px solid rgba(0, 255, 0, 0.2); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s ease;">
+            <div style="font-size: 28px; color: #6b9e83; margin-bottom: 8px;">📍</div>
+            <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #f5f5f5;">Self Drop-Off</h4>
+            <p style="margin: 0; color: #999; font-size: 12px;">You drop off at hub</p>
+            <button onclick="event.stopPropagation(); confirmFulfillment('self-drop')" style="margin-top: 12px; background: #6b9e83; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%;">Choose</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Fulfillment Modal Handler
+    let currentFulfillmentData = null;
+
+    function showFulfillmentModal(data) {
+      currentFulfillmentData = data;
+      
+      document.getElementById('ecopoints-message').textContent = data.ecoPointsMessage;
+      document.getElementById('hub-name').textContent = data.selectedHub.hubName;
+      document.getElementById('collection-schedule').textContent = `Collection in ${data.nextCollection.daysRemaining} days (${data.nextCollection.dateString})`;
+      
+      document.getElementById('fulfillment-modal').style.display = 'flex';
+    }
+
+    function handleFulfillmentChoice(type) {
+      const cards = document.querySelectorAll('#fulfillment-modal > div > div:last-child > div:nth-child(3) > div');
+      cards.forEach(card => {
+        card.style.borderColor = type === 'pickup' && cards.indexOf(card) === 0 || type === 'self-drop' && cards.indexOf(card) === 1 ? '#6b9e83' : 'rgba(0, 255, 0, 0.2)';
+      });
+    }
+
+    function confirmFulfillment(type) {
+      if (!currentFulfillmentData) return;
+
+      const fulfillmentData = {
+        transactionId: currentFulfillmentData.transactionId,
+        level: currentFulfillmentData.level,
+        fulfillmentType: type,
+        hubSelected: currentFulfillmentData.selectedHub,
+        collectionDate: currentFulfillmentData.nextCollection.dateString,
+        itemName: currentFulfillmentData.itemName,
+      };
+
+      if (window.collectionDriveSystem) {
+        window.collectionDriveSystem.completeFulfillment(fulfillmentData);
+      }
+
+      document.getElementById('fulfillment-modal').style.display = 'none';
+      toastManager.success(`✅ ${type === 'pickup' ? 'Collection scheduled' : 'Drop-off location saved'}`);
+    }
+  </script>
+
+  <!-- ReturnBox & MaterialBank Collection Drive Integration -->
+  <script>
+    // Helper function to update all stats
+    function updateAllStats() {
+      if (!window.collectionDriveSystem) return;
+
+      const transactions = window.collectionDriveSystem.getTransactionHistory();
+      const fulfillments = window.collectionDriveSystem.getFulfillmentHistory();
+
+      // ReturnBox Stats (Level 3)
+      const returnTxns = transactions.filter(t => t.level === 3);
+      const returnFulfillments = fulfillments.filter(f => f.level === 3);
+      const returnPointsTotal = returnTxns.reduce((sum, t) => sum + t.pointsEarned, 0);
+      const returnHubsUsed = new Set(returnFulfillments.map(f => f.hubSelected)).size;
+
+      document.getElementById('return-count').textContent = returnTxns.length;
+      document.getElementById('return-points-earned').textContent = returnPointsTotal;
+      document.getElementById('return-items-collected').textContent = returnFulfillments.filter(f => f.fulfillmentType === 'pickup').length;
+      document.getElementById('return-hubs-used').textContent = returnHubsUsed;
+
+      // MaterialBank Stats (Level 4)
+      const materialTxns = transactions.filter(t => t.level === 4);
+      const materialFulfillments = fulfillments.filter(f => f.level === 4);
+      const materialPointsTotal = materialTxns.reduce((sum, t) => sum + t.pointsEarned, 0);
+      let totalKg = 0;
+      materialFulfillments.forEach(f => {
+        const match = f.itemName.match(/(\d+)\s*kg/);
+        if (match) totalKg += parseInt(match[1]);
+      });
+      const materialHubsUsed = new Set(materialFulfillments.map(f => f.hubSelected)).size;
+
+      document.getElementById('material-count').textContent = materialFulfillments.length;
+      document.getElementById('material-kg').textContent = totalKg;
+      document.getElementById('material-points').textContent = materialPointsTotal;
+      document.getElementById('material-hubs-used').textContent = materialHubsUsed;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // ====== MATERIALBANK TAB SWITCHING ======
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const tabName = e.target.dataset.tab;
+          
+          // Hide all tab contents
+          document.querySelectorAll('.tab-content').forEach(content => {
+            content.style.display = 'none';
+          });
+          
+          // Show selected tab
+          const selectedTab = document.getElementById(tabName);
+          if (selectedTab) {
+            selectedTab.style.display = 'block';
+          }
+          
+          // Update button styles
+          tabButtons.forEach(b => {
+            b.style.color = '#999';
+            b.style.borderBottomColor = 'transparent';
+          });
+          e.target.style.color = '#6b9e83';
+          e.target.style.borderBottomColor = '#6b9e83';
+        });
+      });
+
+      // Initialize EcoPoints system if not already done
+      if (typeof ecoPoints === 'undefined') {
+        window.ecoPoints = new EcoPointsSystem();
+      }
+
+      // Update stats on initial load
+      updateAllStats();
+
+      // ====== RETURNBOX FORM HANDLER (Level 3) ======
+      const returnboxForm = document.getElementById('returnbox-form');
+      if (returnboxForm) {
+        returnboxForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+
+          const itemName = document.getElementById('return-item-name').value;
+          const category = document.getElementById('return-category').value;
+          const quantity = parseInt(document.getElementById('return-quantity').value) || 1;
+          const condition = document.getElementById('return-condition').value;
+          const notes = document.getElementById('return-notes').value;
+
+          if (!itemName || !category || !condition) {
+            if (typeof toastManager !== 'undefined') toastManager.error('Please fill all required fields');
+            return;
+          }
+
+          const transactionId = `L3_${itemName}_${Date.now()}`;
+
+          // Calculate points: Base 20 + condition bonus + bulk bonus
+          let pointsEarned = 20;
+          let conditionBonus = 0;
+          
+          if (condition === 'like-new') conditionBonus = 5;
+          else if (condition === 'excellent') conditionBonus = 3;
+          
+          const bulkBonus = Math.max(0, (quantity - 1) * 2);
+          pointsEarned += conditionBonus + bulkBonus;
+
+          // Award points
+          if (typeof ecoPoints !== 'undefined') {
+            const pointsResult = ecoPoints.addPoints('LEVEL3_MEDIUM_RETURN', {
+              transactionId: transactionId,
+              itemId: itemName,
+              quantity: quantity,
+              category: category,
+              condition: condition
+            });
+
+            if (pointsResult.success) {
+              // Show success notification with actual points
+              if (typeof toastManager !== 'undefined') {
+                toastManager.success(`✅ +${pointsEarned} EcoPoints awarded! (Base: 20 + Condition: ${conditionBonus} + Bulk: ${bulkBonus})`);
+              }
+              
+              // Record in collection drive system
+              if (window.collectionDriveSystem) {
+                window.collectionDriveSystem.recordTransaction({
+                  transactionId: transactionId,
+                  level: 3,
+                  pointsEarned: pointsEarned,
+                  timestamp: new Date().toISOString(),
+                  itemName: itemName,
+                  quantity: quantity,
+                  category: category,
+                  condition: condition,
+                  notes: notes
+                });
+              }
+              
+              // Add to return history
+              logReturnHistory(itemName, quantity, condition, pointsEarned, transactionId);
+              
+              // Show fulfillment modal
+              if (window.collectionDriveSystem && typeof showFulfillmentModal === 'function') {
+                const nearestHub = window.collectionDriveSystem.getNearestHub();
+                if (nearestHub) {
+                  const nextCollection = window.collectionDriveSystem.calculateNextCollection(nearestHub);
+                  
+                  showFulfillmentModal({
+                    ecoPointsMessage: `✓ +${pointsEarned} EcoPoints added for your circular contribution 🌱`,
+                    nextCollection: nextCollection,
+                    selectedHub: nearestHub,
+                    itemName: `${quantity}x ${itemName}`,
+                    transactionId: transactionId,
+                    level: 3,
+                  });
+                }
+              }
+
+              returnboxForm.reset();
+              updateAllStats();
+            } else {
+              if (typeof toastManager !== 'undefined') toastManager.error(`❌ ${pointsResult.message}`);
+            }
+          }
+        });
+      }
+
+      // ====== MATERIALBANK FORM HANDLER (Level 4) - QUANTITY BASED ======
+      const materialbankForm = document.getElementById('materialbank-form');
+      if (materialbankForm) {
+        // Real-time points calculator
+        const materialCategory = document.getElementById('material-category');
+        const materialQuantity = document.getElementById('material-quantity');
+        const materialQuality = document.getElementById('material-quality');
+        const pointsPreview = document.getElementById('material-points-preview');
+
+        function calculateMaterialPoints() {
+          const qty = parseInt(materialQuantity.value) || 0;
+          const cat = materialCategory.value;
+          const qual = materialQuality.value;
+
+          if (!qty || !cat || !qual) {
+            pointsPreview.textContent = '0 Points';
+            return 0;
+          }
+
+          // Base points per kg by category
+          let pointsPerKg = 0;
+          if (cat === 'metal' || cat === 'electronic') pointsPerKg = 1.0;
+          else if (cat === 'plastic' || cat === 'glass' || cat === 'textile' || cat === 'wood') pointsPerKg = 0.5;
+          else if (cat === 'paper' || cat === 'organic') pointsPerKg = 0.25;
+
+          let totalPoints = qty * pointsPerKg;
+
+          // Quality bonus
+          if (qual === 'premium') totalPoints *= 1.20;
+          else if (qual === 'standard') totalPoints *= 1.10;
+
+          totalPoints = Math.round(totalPoints * 100) / 100;
+          pointsPreview.textContent = `${totalPoints} Points`;
+          return totalPoints;
+        }
+
+        if (materialCategory) materialCategory.addEventListener('change', calculateMaterialPoints);
+        if (materialQuantity) materialQuantity.addEventListener('input', calculateMaterialPoints);
+        if (materialQuality) materialQuality.addEventListener('change', calculateMaterialPoints);
+
+        materialbankForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+
+          const materialName = document.getElementById('material-name').value;
+          const category = document.getElementById('material-category').value;
+          const quantity = parseInt(document.getElementById('material-quantity').value) || 0;
+          const quality = document.getElementById('material-quality').value;
+          const notes = document.getElementById('material-notes').value;
+
+          if (!materialName || !category || quantity <= 0 || !quality) {
+            if (typeof toastManager !== 'undefined') toastManager.error('Please fill all required fields');
+            return;
+          }
+
+          const transactionId = `L4_${materialName}_${Date.now()}`;
+          const pointsEarned = calculateMaterialPoints();
+
+          // Award points
+          if (typeof ecoPoints !== 'undefined') {
+            const pointsResult = ecoPoints.addPoints('LEVEL4_MATERIAL_MATCH', {
+              transactionId: transactionId,
+              itemId: materialName,
+              quantity: quantity,
+              category: category,
+              quality: quality
+            });
+
+            if (pointsResult.success) {
+              // Show success notification with actual points
+              if (typeof toastManager !== 'undefined') {
+                toastManager.success(`✅ +${pointsEarned} EcoPoints awarded for ${quantity}kg of ${materialName}!`);
+              }
+
+              // Record in collection drive system
+              if (window.collectionDriveSystem) {
+                window.collectionDriveSystem.recordTransaction({
+                  transactionId: transactionId,
+                  level: 4,
+                  pointsEarned: Math.round(pointsEarned),
+                  timestamp: new Date().toISOString(),
+                  itemName: materialName,
+                  quantity: quantity,
+                  category: category,
+                  quality: quality,
+                  notes: notes
+                });
+              }
+              
+              // Add to material records
+              logMaterialRecord(materialName, quantity, category, quality, pointsEarned, transactionId);
+              
+              // Show fulfillment modal
+              if (window.collectionDriveSystem && typeof showFulfillmentModal === 'function') {
+                const nearestHub = window.collectionDriveSystem.getNearestHub();
+                if (nearestHub) {
+                  const nextCollection = window.collectionDriveSystem.calculateNextCollection(nearestHub);
+                  
+                  showFulfillmentModal({
+                    ecoPointsMessage: `✓ +${pointsEarned} EcoPoints added for your circular contribution 🌱`,
+                    nextCollection: nextCollection,
+                    selectedHub: nearestHub,
+                    itemName: `${quantity} kg ${materialName}`,
+                    transactionId: transactionId,
+                    level: 4,
+                  });
+                }
+              }
+
+              materialbankForm.reset();
+              pointsPreview.textContent = '0 Points';
+              updateAllStats();
+            } else {
+              if (typeof toastManager !== 'undefined') toastManager.error(`❌ ${pointsResult.message}`);
+            }
+          }
+        });
+      }
+
+      // ====== REQUEST MATERIAL FORM HANDLER (Premium Feature) ======
+      const requestMaterialForm = document.getElementById('request-material-form');
+      if (requestMaterialForm) {
+        requestMaterialForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+
+          const material = document.getElementById('request-material').value;
+          const quantity = parseInt(document.getElementById('request-quantity').value) || 0;
+          const quality = document.getElementById('request-quality').value;
+          const budget = document.getElementById('request-budget').value;
+          const location = document.getElementById('request-location').value;
+          const notes = document.getElementById('request-notes').value;
+          const timestamp = new Date().toISOString();
+          const requestId = `REQ-${Date.now()}`;
+
+          if (!material || !quantity || !quality || !budget || !location) {
+            if (typeof toastManager !== 'undefined') toastManager.error('Please fill all required fields');
+            return;
+          }
+
+          // Store request in localStorage
+          const requests = JSON.parse(localStorage.getItem('materialbank_requests') || '[]');
+          requests.push({
+            id: requestId,
+            material,
+            quantity,
+            quality,
+            budget,
+            location,
+            notes,
+            timestamp,
+            status: 'active'
+          });
+          localStorage.setItem('materialbank_requests', JSON.stringify(requests));
+
+          // Show success notification
+          if (typeof toastManager !== 'undefined') {
+            toastManager.success(`✅ Material request posted! ID: ${requestId}`);
+          }
+
+          // Add to request records
+          displayRequestRecord(material, quantity, quality, budget, location, requestId);
+
+          requestMaterialForm.reset();
+          updateAllStats();
+        });
+      }
+    });
+
+    // Helper: Display request record
+    function displayRequestRecord(material, quantity, quality, budget, location, requestId) {
+      const container = document.getElementById('request-records');
+      if (!container) return;
+
+      if (container.querySelector('p')) {
+        container.innerHTML = '';
+      }
+
+      const entry = document.createElement('div');
+      entry.className = 'bg-amber-900 bg-opacity-10 border border-amber-700 rounded p-3';
+      entry.innerHTML = `
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <p class="font-semibold text-sm">🔍 ${material}</p>
+            <p class="text-xs text-muted">${quantity}kg • ${quality} • Budget: ${budget}</p>
+            <p class="text-xs text-muted">Location: ${location}</p>
+            <p class="text-xs text-muted">ID: ${requestId}</p>
+          </div>
+          <span class="bg-green-900 bg-opacity-30 text-green-400 px-2 py-1 rounded text-xs">Active</span>
+        </div>
+        <p class="text-xs text-muted">${new Date().toLocaleTimeString()}</p>
+      `;
+      container.insertBefore(entry, container.firstChild);
+
+      while (container.children.length > 5) {
+        container.removeChild(container.lastChild);
+      }
+    }
+
+    // Helper: Log return to history
+    function logReturnHistory(itemName, quantity, condition, pointsEarned, transactionId) {
+      const container = document.getElementById('returnbox-history');
+      if (!container) return;
+
+      if (container.querySelector('p')) {
+        container.innerHTML = '';
+      }
+
+      const entry = document.createElement('div');
+      entry.className = 'bg-sage-accent bg-opacity-10 border border-sage-accent rounded p-3';
+      entry.innerHTML = `
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <p class="font-semibold text-sm">${quantity}x ${itemName}</p>
+            <p class="text-xs text-muted">${condition} condition • ID: ${transactionId.substring(0, 20)}...</p>
+          </div>
+          <p class="font-bold sage-accent">+${pointsEarned} pts</p>
+        </div>
+        <p class="text-xs text-muted">${new Date().toLocaleTimeString()}</p>
+      `;
+      container.insertBefore(entry, container.firstChild);
+
+      while (container.children.length > 8) {
+        container.removeChild(container.lastChild);
+      }
+    }
+
+    /**
+     * Update impact dashboard metrics in real-time
+     * Integrates data from all 5 levels + material bank + return box
+     */
+    async function updateImpactDashboard() {
+      try {
+        const response = await fetch('http://localhost:3000/api/impact/dashboard');
+        if (!response.ok) throw new Error('Failed to fetch dashboard');
+        
+        const data = await response.json();
+        const metrics = data.metrics;
+        const outcomes = data.waste_outcomes;
+        
+        // Update main metrics by ID
+        const updateElement = (id, value) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = value;
+        };
+        
+        updateElement('metric-waste-diverted', metrics.waste_diverted);
+        updateElement('metric-food-saved', metrics.co2_saved);
+        updateElement('metric-items-reused', metrics.items_reused);
+        updateElement('metric-materials-matched', metrics.reuse_transactions);
+        updateElement('compost-count', outcomes.composted);
+        updateElement('recycle-count', outcomes.recycled);
+        updateElement('reuse-count-impact', outcomes.reused);
+        updateElement('carbon-reduced', metrics.co2_saved);
+
+        // Update waste breakdown bars
+        const totalWaste = outcomes.reused + outcomes.recycled + outcomes.composted;
+        if (totalWaste > 0) {
+          const reuseBar = document.getElementById('reuse-bar');
+          const recycleBar = document.getElementById('recycle-bar');
+          const composterBar = document.getElementById('compost-bar');
+          
+          if (reuseBar) reuseBar.style.width = `${(outcomes.reused / totalWaste * 100)}%`;
+          if (recycleBar) recycleBar.style.width = `${(outcomes.recycled / totalWaste * 100)}%`;
+          if (composterBar) composterBar.style.width = `${(outcomes.composted / totalWaste * 100)}%`;
+        }
+        
+        console.log('✓ Impact Dashboard Updated from API:', metrics);
+      } catch (error) {
+        console.warn('Using fallback dashboard data:', error.message);
+        // Fallback to localStorage data if API fails
+        const materials = JSON.parse(localStorage.getItem('materialbank_history') || '[]');
+        const returns = JSON.parse(localStorage.getItem('returnbox_history') || '[]');
+        
+        document.getElementById('metric-waste-diverted').textContent = materials.length;
+        document.getElementById('metric-items-reused').textContent = returns.length;
+      }
+    }
+
+    // Update dashboard when materials are logged
+    function logMaterialRecord(materialName, quantity, category, quality, pointsEarned, transactionId) {
+      const container = document.getElementById('materialbank-records');
+      if (!container) return;
+
+      if (container.querySelector('p')) {
+        container.innerHTML = '';
+      }
+
+      const entry = document.createElement('div');
+      entry.className = 'bg-sage-accent bg-opacity-10 border border-sage-accent rounded p-3';
+      entry.innerHTML = `
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <p class="font-semibold text-sm">${quantity} kg ${materialName}</p>
+            <p class="text-xs text-muted">${category} • ${quality} • ID: ${transactionId.substring(0, 20)}...</p>
+          </div>
+          <p class="font-bold sage-accent">+${Math.round(pointsEarned)} pts</p>
+        </div>
+        <p class="text-xs text-muted">${new Date().toLocaleTimeString()}</p>
+      `;
+      container.insertBefore(entry, container.firstChild);
+
+      while (container.children.length > 8) {
+        container.removeChild(container.lastChild);
+      }
+      
+      // Update impact dashboard
+      updateImpactDashboard();
+    }
+  </script>
+</body>
+</html>

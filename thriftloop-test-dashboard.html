@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ThriftLoop - System Testing Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #000000 0%, #000000 100%);
+      color: #f5f5f5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    
+    .test-badge { 
+      display: inline-block; 
+      padding: 4px 12px; 
+      border-radius: 4px; 
+      font-size: 11px; 
+      font-weight: 600;
+    }
+    
+    .badge-pass { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .badge-fail { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .badge-info { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+    
+    .section { 
+      background: #000000; 
+      border: 1px solid #003300; 
+      border-radius: 12px; 
+      padding: 24px; 
+      margin-bottom: 24px;
+    }
+    
+    .btn-test {
+      background: #6b9e83;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .btn-test:hover {
+      background: #5a8e72;
+      transform: translateY(-2px);
+    }
+    
+    .log-box {
+      background: rgba(45, 52, 54, 0.5);
+      border: 1px solid #003300;
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+      color: #6b9e83;
+    }
+    
+    .log-item { margin: 4px 0; }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen p-8">
+    <div class="max-w-1200px mx-auto">
+      <!-- Header -->
+      <div class="mb-32 text-center">
+        <h1 class="text-4xl font-bold mb-4">
+          <span style="background: linear-gradient(135deg, #6b9e83 0%, #a8d5ba 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            ThriftLoop Testing Dashboard
+          </span>
+        </h1>
+        <p class="text-gray-400">Comprehensive system verification and testing suite</p>
+      </div>
+
+      <!-- System Status -->
+      <div class="section">
+        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+          <i class="fas fa-heartbeat" style="color: #6b9e83;"></i> System Status
+        </h2>
+        
+        <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div>
+            <div class="font-semibold mb-2">ThriftLoopSystem</div>
+            <span class="test-badge badge-pass" id="sys-thriftloop">✓ LOADED</span>
+          </div>
+          <div>
+            <div class="font-semibold mb-2">EcoPoints</div>
+            <span class="test-badge badge-pass" id="sys-ecopoints">✓ LOADED</span>
+          </div>
+          <div>
+            <div class="font-semibold mb-2">ToastManager</div>
+            <span class="test-badge badge-pass" id="sys-toast">✓ LOADED</span>
+          </div>
+          <div>
+            <div class="font-semibold mb-2">User Role</div>
+            <span class="test-badge badge-info" id="sys-role">👤 Regular</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory Overview -->
+      <div class="section">
+        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+          <i class="fas fa-boxes" style="color: #6b9e83;"></i> Inventory Overview
+        </h2>
+        
+        <div class="grid grid-cols-3 gap-4 mb-6">
+          <div class="bg-rgba(0, 255, 0, 0.1) border border-#6b9e83 rounded-lg p-4 text-center">
+            <div class="text-2xl font-bold text-#6b9e83" id="inv-total">0</div>
+            <div class="text-sm text-gray-400">Total Items</div>
+          </div>
+          <div class="bg-rgba(0, 255, 0, 0.1) border border-#6b9e83 rounded-lg p-4 text-center">
+            <div class="text-2xl font-bold text-#6b9e83" id="inv-available">0</div>
+            <div class="text-sm text-gray-400">Available</div>
+          </div>
+          <div class="bg-rgba(0, 255, 0, 0.1) border border-#6b9e83 rounded-lg p-4 text-center">
+            <div class="text-2xl font-bold text-#6b9e83" id="inv-hubs">0</div>
+            <div class="text-sm text-gray-400">Collection Hubs</div>
+          </div>
+        </div>
+
+        <button class="btn-test" onclick="testInventory()">
+          <i class="fas fa-search"></i> Run Inventory Test
+        </button>
+      </div>
+
+      <!-- EcoPoints Testing -->
+      <div class="section">
+        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+          <i class="fas fa-coins" style="color: #6b9e83;"></i> EcoPoints System
+        </h2>
+        
+        <div class="bg-rgba(0, 255, 0, 0.1) border border-#6b9e83 rounded-lg p-4 mb-6">
+          <div class="text-sm text-gray-400 mb-2">Current Balance</div>
+          <div class="text-3xl font-bold text-#6b9e83" id="balance-display">0</div>
+        </div>
+
+        <div class="flex gap-2">
+          <button class="btn-test" onclick="addTestPoints()">
+            <i class="fas fa-plus"></i> Add 100 Points
+          </button>
+          <button class="btn-test" onclick="viewBalance()">
+            <i class="fas fa-eye"></i> View Balance
+          </button>
+          <button class="btn-test" onclick="testDeduction()">
+            <i class="fas fa-minus"></i> Test Deduction
+          </button>
+        </div>
+      </div>
+
+      <!-- Role Management -->
+      <div class="section">
+        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+          <i class="fas fa-shield-alt" style="color: #6b9e83;"></i> Role Management
+        </h2>
+        
+        <div class="bg-rgba(0, 255, 0, 0.1) border border-#6b9e83 rounded-lg p-4 mb-6">
+          <div class="text-sm text-gray-400 mb-2">Current Role</div>
+          <div class="text-xl font-bold text-#6b9e83" id="role-display">Regular User</div>
+        </div>
+
+        <div class="flex gap-2">
+          <button class="btn-test" onclick="setRegularUser()">
+            <i class="fas fa-user"></i> Set Regular User
+          </button>
+          <button class="btn-test" onclick="setHubAdmin()">
+            <i class="fas fa-crown"></i> Set Hub Admin
+          </button>
+          <button class="btn-test" onclick="goToAdmin()">
+            <i class="fas fa-external-link-alt"></i> Go To Admin Panel
+          </button>
+        </div>
+      </div>
+
+      <!-- Redemption Testing -->
+      <div class="section">
+        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+          <i class="fas fa-shopping-bag" style="color: #6b9e83;"></i> Redemption Testing
+        </h2>
+        
+        <div class="grid grid-cols-2 gap-4 mb-6" id="redemption-stats">
+          <div>
+            <div class="text-sm text-gray-400 mb-2">Total Redeemed</div>
+            <div class="text-2xl font-bold text-#6b9e83" id="redeemed-count">0</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-400 mb-2">Affordable Items</div>
+            <div class="text-2xl font-bold text-#6b9e83" id="affordable-count">0</div>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button class="btn-test" onclick="viewRedemptions()">
+            <i class="fas fa-history"></i> View Redemptions
+          </button>
+          <button class="btn-test" onclick="testRedemptionFlow()">
+            <i class="fas fa-play"></i> Test Flow
+          </button>
+        </div>
+      </div>
+
+      <!-- Console Log -->
+      <div class="section">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <i class="fas fa-terminal" style="color: #6b9e83;"></i> Console Output
+        </h2>
+        
+        <div class="log-box" id="console-log">
+          <div class="log-item">Ready for testing...</div>
+        </div>
+        
+        <button class="btn-test mt-4" onclick="clearLog()">
+          <i class="fas fa-trash"></i> Clear Log
+        </button>
+      </div>
+
+      <!-- Navigation -->
+      <div class="section text-center">
+        <h2 class="text-xl font-bold mb-6">Quick Navigation</h2>
+        <div class="flex justify-center gap-4 flex-wrap">
+          <a href="thriftloop.html" class="btn-test bg-blue-600 hover:bg-blue-700">
+            <i class="fas fa-shopping"></i> User Page
+          </a>
+          <a href="thriftloop-admin.html" class="btn-test bg-orange-600 hover:bg-orange-700">
+            <i class="fas fa-cog"></i> Admin Panel
+          </a>
+          <a href="app.html" class="btn-test bg-gray-600 hover:bg-gray-700">
+            <i class="fas fa-home"></i> Main App
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="ecopoints-system.js"></script>
+  <script src="thriftloop-system.js"></script>
+  <script src="toast-notifications.js"></script>
+
+  <script>
+    let consoleLogs = [];
+
+    function log(message) {
+      consoleLogs.push(message);
+      const logBox = document.getElementById('console-log');
+      logBox.innerHTML = consoleLogs.map(log => `<div class="log-item">${log}</div>`).join('');
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function clearLog() {
+      consoleLogs = [];
+      document.getElementById('console-log').innerHTML = '<div class="log-item">Log cleared...</div>';
+    }
+
+    // Initialize on load
+    function initializeDashboard() {
+      log('🚀 ThriftLoop Testing Dashboard Initialized');
+      updateStatus();
+      updateBalance();
+      updateRoleDisplay();
+    }
+
+    function updateStatus() {
+      // Check systems
+      document.getElementById('sys-thriftloop').textContent = window.thriftLoopSystem ? '✓ LOADED' : '✗ MISSING';
+      document.getElementById('sys-ecopoints').textContent = window.ecoPoints ? '✓ LOADED' : '✗ MISSING';
+      document.getElementById('sys-toast').textContent = window.toastManager ? '✓ LOADED' : '✗ MISSING';
+      
+      // Inventory stats
+      if (window.thriftLoopSystem) {
+        const inventory = thriftLoopSystem.getInventory();
+        const available = inventory.filter(i => i.available).length;
+        const hubs = thriftLoopSystem.getHubs();
+        
+        document.getElementById('inv-total').textContent = inventory.length;
+        document.getElementById('inv-available').textContent = available;
+        document.getElementById('inv-hubs').textContent = hubs.length;
+      }
+
+      updateRoleDisplay();
+    }
+
+    function updateBalance() {
+      if (window.ecoPoints) {
+        const balance = ecoPoints.getBalance();
+        document.getElementById('balance-display').textContent = balance;
+        
+        // Count affordable items
+        if (window.thriftLoopSystem) {
+          const affordable = thriftLoopSystem.getAffordableItems(balance).length;
+          document.getElementById('affordable-count').textContent = affordable;
+        }
+      }
+    }
+
+    function updateRoleDisplay() {
+      const role = localStorage.getItem('role');
+      const roleDisplay = document.getElementById('role-display');
+      const roleBadge = document.getElementById('sys-role');
+      
+      if (role === 'hub-admin') {
+        roleDisplay.textContent = 'Hub Administrator';
+        roleBadge.className = 'test-badge badge-pass';
+        roleBadge.textContent = '👑 ADMIN';
+      } else {
+        roleDisplay.textContent = 'Regular User';
+        roleBadge.className = 'test-badge badge-info';
+        roleBadge.textContent = '👤 Regular';
+      }
+    }
+
+    function testInventory() {
+      log('📦 Testing Inventory System...');
+      if (!window.thriftLoopSystem) {
+        log('❌ ThriftLoopSystem not available');
+        return;
+      }
+      
+      const inventory = thriftLoopSystem.getInventory();
+      const hubs = thriftLoopSystem.getHubs();
+      
+      log(`✅ Total items: ${inventory.length}`);
+      log(`✅ Available items: ${inventory.filter(i => i.available).length}`);
+      log(`✅ Collection hubs: ${hubs.length}`);
+      
+      inventory.slice(0, 3).forEach(item => {
+        log(`   • ${item.name} - ${item.pointsCost} pts (${item.available ? 'Available' : 'Redeemed'})`);
+      });
+    }
+
+    function addTestPoints() {
+      log('💰 Adding 100 test points...');
+      if (window.ecoPoints) {
+        ecoPoints.addPoints('TEST_MANUAL', { amount: 100 });
+        updateBalance();
+        log('✅ Added 100 points');
+        if (toastManager) toastManager.success('✅ Added 100 test points!');
+      }
+    }
+
+    function viewBalance() {
+      const balance = ecoPoints.getBalance();
+      log(`💰 Current Balance: ${balance} EcoPoints`);
+    }
+
+    function testDeduction() {
+      log('💸 Testing points deduction...');
+      const initialBalance = ecoPoints.getBalance();
+      
+      if (initialBalance < 30) {
+        log('❌ Insufficient points for test. Add points first.');
+        return;
+      }
+      
+      ecoPoints.deductPoints(30, 'TEST_DEDUCTION');
+      const newBalance = ecoPoints.getBalance();
+      
+      log(`✅ Deducted 30 points`);
+      log(`   Before: ${initialBalance} pts`);
+      log(`   After: ${newBalance} pts`);
+      
+      updateBalance();
+    }
+
+    function setRegularUser() {
+      localStorage.removeItem('role');
+      log('👤 Set to Regular User');
+      updateRoleDisplay();
+    }
+
+    function setHubAdmin() {
+      localStorage.setItem('role', 'hub-admin');
+      log('👑 Set to Hub Administrator');
+      updateRoleDisplay();
+    }
+
+    function goToAdmin() {
+      const role = localStorage.getItem('role');
+      if (role === 'hub-admin') {
+        window.location.href = 'thriftloop-admin.html';
+      } else {
+        log('❌ You must be a Hub Admin to access admin panel');
+        log('💡 Click "Set Hub Admin" first');
+      }
+    }
+
+    function viewRedemptions() {
+      log('📋 Recent Redemptions:');
+      const redemptions = thriftLoopSystem.getRedemptions();
+      
+      if (redemptions.length === 0) {
+        log('   No redemptions yet');
+        return;
+      }
+      
+      document.getElementById('redeemed-count').textContent = redemptions.length;
+      
+      redemptions.slice(-5).forEach(r => {
+        const date = new Date(r.redeemedDate).toLocaleDateString();
+        log(`   • ${r.itemName} - ${r.pointsSpent} pts (${date})`);
+      });
+    }
+
+    function testRedemptionFlow() {
+      log('🎯 Testing redemption flow...');
+      
+      const balance = ecoPoints.getBalance();
+      const affordable = thriftLoopSystem.getAffordableItems(balance);
+      
+      if (affordable.length === 0) {
+        log('❌ No affordable items. Add points first.');
+        return;
+      }
+      
+      const item = affordable[0];
+      log(`✅ Found affordable item: ${item.name}`);
+      log(`   Cost: ${item.pointsCost} pts`);
+      log(`   Balance: ${balance} pts`);
+      
+      // Try to redeem
+      thriftLoopSystem.recordRedemption(item.id, item.pointsCost);
+      ecoPoints.deductPoints(item.pointsCost, `test_redeem_${item.id}`);
+      
+      log('✅ Redemption successful!');
+      
+      updateBalance();
+      updateStatus();
+      viewRedemptions();
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initializeDashboard);
+    setInterval(updateStatus, 2000);
+  </script>
+</body>
+</html>

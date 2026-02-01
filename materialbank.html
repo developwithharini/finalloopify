@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MaterialBank — Industrial Reuse Marketplace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+      color: #e8e8e8;
+    }
+
+    /* Color System — Earthy & Industrial */
+    .primary-earth { color: #7a9e6f; }
+    .primary-earth-bg { background-color: #7a9e6f; }
+    .secondary-brown { color: #a67c52; }
+    .secondary-brown-bg { background-color: #a67c52; }
+    .accent-warm { color: #d4b896; }
+
+    /* Buttons */
+    .button-primary {
+      background-color: #7a9e6f;
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .button-primary:hover {
+      background-color: #6a8d5f;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(122, 158, 111, 0.25);
+    }
+
+    .button-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .button-secondary {
+      background-color: transparent;
+      color: #7a9e6f;
+      border: 1.5px solid #7a9e6f;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .button-secondary:hover {
+      background-color: rgba(122, 158, 111, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .button-sm {
+      padding: 8px 16px;
+      font-size: 12px;
+    }
+
+    .button-danger {
+      background-color: transparent;
+      color: #dc2626;
+      border: 1.5px solid #dc2626;
+    }
+
+    .button-danger:hover {
+      background-color: rgba(220, 38, 38, 0.1);
+    }
+
+    /* Cards */
+    .card {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 28px;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: #7a9e6f;
+      box-shadow: 0 12px 40px rgba(122, 158, 111, 0.12);
+    }
+
+    .card-large {
+      background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
+      border: 2px solid #333;
+      padding: 40px;
+    }
+
+    /* Role Selection Cards */
+    .role-card {
+      background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
+      border: 2px solid #3a3a3a;
+      border-radius: 16px;
+      padding: 48px 32px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .role-card:hover {
+      border-color: #7a9e6f;
+      box-shadow: 0 20px 60px rgba(122, 158, 111, 0.15);
+      transform: translateY(-8px);
+    }
+
+    .role-icon {
+      font-size: 64px;
+      color: #7a9e6f;
+      margin-bottom: 24px;
+    }
+
+    /* Inputs */
+    .input-field {
+      background-color: #0d0d0d;
+      border: 1px solid #333;
+      color: #e8e8e8;
+      padding: 12px 16px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: #7a9e6f;
+      box-shadow: 0 0 0 3px rgba(122, 158, 111, 0.1);
+    }
+
+    .input-field::placeholder {
+      color: #666;
+    }
+
+    .select-field {
+      background-color: #0d0d0d;
+      border: 1px solid #333;
+      color: #e8e8e8;
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .select-field:focus {
+      outline: none;
+      border-color: #7a9e6f;
+      box-shadow: 0 0 0 3px rgba(122, 158, 111, 0.1);
+    }
+
+    /* Status Pills */
+    .status-pill {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-available {
+      background-color: rgba(122, 158, 111, 0.15);
+      color: #7a9e6f;
+    }
+
+    .status-reserved {
+      background-color: rgba(212, 165, 116, 0.15);
+      color: #d4b896;
+    }
+
+    .status-reused {
+      background-color: rgba(34, 197, 94, 0.15);
+      color: #86efac;
+    }
+
+    .status-requested {
+      background-color: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+    }
+
+    /* Badges */
+    .badge-tier {
+      background-color: rgba(166, 124, 82, 0.15);
+      color: #a67c52;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-locked {
+      background-color: rgba(100, 100, 100, 0.15);
+      color: #999;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* Text Styles */
+    .text-muted {
+      color: #999;
+    }
+
+    .text-sm {
+      font-size: 14px;
+    }
+
+    .text-xs {
+      font-size: 12px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 2px solid #333;
+      font-weight: 600;
+      color: #7a9e6f;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 14px 12px;
+      border-bottom: 1px solid #333;
+    }
+
+    tr:hover {
+      background-color: rgba(122, 158, 111, 0.05);
+    }
+
+    /* Empty States */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .empty-text {
+      color: #999;
+      font-size: 14px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .header {
+      padding: 40px 0 20px;
+      border-bottom: 1px solid #333;
+      margin-bottom: 32px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    /* Navigation Bar */
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #333;
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .navbar-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .navbar-brand {
+      font-size: 20px;
+      font-weight: 700;
+      color: #7a9e6f;
+    }
+
+    .navbar-back {
+      color: #999;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s ease;
+    }
+
+    .navbar-back:hover {
+      color: #7a9e6f;
+    }
+
+    /* Tier Locked Overlay */
+    .tier-locked {
+      position: relative;
+    }
+
+    .tier-locked::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      backdrop-filter: blur(2px);
+    }
+
+    .tier-lock-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background-color: rgba(100, 100, 100, 0.9);
+      color: #999;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      z-index: 10;
+    }
+
+    /* Alert Messages */
+    .alert {
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .alert-success {
+      background-color: rgba(122, 158, 111, 0.15);
+      border: 1px solid #7a9e6f;
+      color: #b3e5a3;
+    }
+
+    .alert-error {
+      background-color: rgba(220, 38, 38, 0.15);
+      border: 1px solid #dc2626;
+      color: #fca5a5;
+    }
+
+    .alert-info {
+      background-color: rgba(59, 130, 246, 0.15);
+      border: 1px solid #3b82f6;
+      color: #93c5fd;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .role-card {
+        padding: 32px 20px;
+      }
+
+      .role-icon {
+        font-size: 48px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .container {
+        padding: 0 16px;
+      }
+
+      table {
+        font-size: 13px;
+      }
+
+      th, td {
+        padding: 10px 8px;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <div class="navbar">
+    <div class="container navbar-content">
+      <div class="navbar-brand">MaterialBank</div>
+      <a href="app.html" class="navbar-back">← Back to App</a>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- ====================================
+         SCREEN 1: ROLE SELECTION
+         ==================================== -->
+    <section id="roleSelection" class="section active">
+      <div class="header text-center">
+        <h1 class="text-5xl font-bold mb-4">MaterialBank</h1>
+        <p class="text-muted text-lg">Turn industrial waste into valuable resources</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-12 py-20">
+        <!-- Producer Card -->
+        <div class="role-card animate-in" style="cursor: pointer;" onclick="selectRole('producer')">
+          <div class="role-icon">
+            <i class="fas fa-industry"></i>
+          </div>
+          <h2 class="text-2xl font-bold mb-3">I Produce Materials</h2>
+          <p class="text-muted text-sm mb-8 leading-relaxed">
+            List surplus or by-product materials from your operations for reuse by others.
+          </p>
+          <button class="button-primary w-full">List Materials</button>
+        </div>
+
+        <!-- Reuser Card -->
+        <div class="role-card animate-in" style="cursor: pointer;" onclick="selectRole('reuser')">
+          <div class="role-icon">
+            <i class="fas fa-recycle"></i>
+          </div>
+          <h2 class="text-2xl font-bold mb-3">I Reuse Materials</h2>
+          <p class="text-muted text-sm mb-8 leading-relaxed">
+            Find industrial materials available for reuse in your manufacturing or operations.
+          </p>
+          <button class="button-primary w-full">Find Materials</button>
+        </div>
+      </div>
+
+      <!-- Info Section -->
+      <div class="grid md:grid-cols-3 gap-8 py-12 border-t border-gray-800">
+        <div class="text-center">
+          <div class="text-3xl font-bold primary-earth mb-2">0</div>
+          <p class="text-muted text-sm">Materials Available</p>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold primary-earth mb-2">0</div>
+          <p class="text-muted text-sm">Active Producers</p>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold primary-earth mb-2">0</div>
+          <p class="text-muted text-sm">Waste Diverted (kg)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================
+         SCREEN 2: PRODUCER INTERFACE
+         ==================================== -->
+    <section id="producerInterface" class="section">
+      <div class="header flex justify-between items-center">
+        <div>
+          <button class="button-secondary button-sm mb-4" onclick="selectRole('back')">← Back</button>
+          <h1 class="text-4xl font-bold">List Secondary Materials</h1>
+          <p class="text-muted mt-2">Add industrial by-products or surplus materials for reuse.</p>
+        </div>
+        <div class="text-right">
+          <div class="badge-tier">Producer</div>
+          <p class="text-muted text-xs mt-2" id="producerTierInfo">Basic Plan</p>
+        </div>
+      </div>
+
+      <!-- Success/Error Alerts -->
+      <div class="alert alert-success" id="producerSuccess">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="producerSuccessMsg">Material listed successfully for reuse.</span>
+      </div>
+      <div class="alert alert-error" id="producerError">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <span id="producerErrorMsg">An error occurred. Please try again.</span>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8 mb-8">
+        <!-- Form Section -->
+        <div class="md:col-span-2">
+          <div class="card">
+            <h2 class="text-2xl font-bold mb-6">Add New Listing</h2>
+
+            <form id="producerForm" class="space-y-6">
+              <!-- Material Name -->
+              <div>
+                <label class="block text-sm font-medium mb-2">Material Name *</label>
+                <input
+                  type="text"
+                  class="input-field w-full"
+                  placeholder="e.g., Plastic Sheets, Aluminum Offcuts"
+                  id="materialName"
+                  required
+                />
+              </div>
+
+              <!-- Category -->
+              <div>
+                <label class="block text-sm font-medium mb-2">Category *</label>
+                <select class="select-field w-full" id="materialCategory" required>
+                  <option value="">Select category</option>
+                  <option value="plastic">Plastic</option>
+                  <option value="metal">Metal</option>
+                  <option value="glass">Glass</option>
+                  <option value="textile">Textile</option>
+                  <option value="organic">Organic</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <!-- Quantity -->
+              <div>
+                <label class="block text-sm font-medium mb-2">Quantity (kg) *</label>
+                <input
+                  type="number"
+                  class="input-field w-full"
+                  placeholder="e.g., 500"
+                  id="materialQuantity"
+                  min="1"
+                  required
+                />
+              </div>
+
+              <!-- Material Condition -->
+              <div>
+                <label class="block text-sm font-medium mb-2">Material Condition</label>
+                <select class="select-field w-full" id="materialCondition">
+                  <option value="clean">Clean</option>
+                  <option value="processing">Requires Processing</option>
+                  <option value="mixed">Mixed</option>
+                </select>
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label class="block text-sm font-medium mb-2">Description (Optional)</label>
+                <textarea
+                  class="input-field w-full"
+                  placeholder="Additional details about the material..."
+                  id="materialDescription"
+                  rows="4"
+                ></textarea>
+              </div>
+
+              <button type="submit" class="button-primary w-full">List Material</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Tier Info Sidebar -->
+        <div class="card">
+          <h3 class="font-bold mb-4">Your Tier</h3>
+          <div class="badge-tier block mb-4">Basic Plan</div>
+          <div class="space-y-4 text-sm">
+            <div>
+              <h4 class="font-semibold mb-1">Listings Available</h4>
+              <p class="text-muted">3 active listings</p>
+            </div>
+            <div class="border-t border-gray-800 pt-4">
+              <h4 class="font-semibold mb-1">Unlock More</h4>
+              <p class="text-muted text-xs mb-3">Upgrade to Community Plan for unlimited listings.</p>
+              <button class="button-secondary button-sm w-full">Upgrade Plan</button>
+            </div>
+            <div class="border-t border-gray-800 pt-4">
+              <p class="text-xs text-muted">
+                <i class="fas fa-info-circle mr-2"></i>
+                Community & Industrial tiers unlock bulk upload and advanced features.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Listings Section -->
+      <div class="card animate-in">
+        <h2 class="text-2xl font-bold mb-6">Your Active Listings</h2>
+
+        <div id="producerListingsEmpty" class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-inbox"></i>
+          </div>
+          <p class="empty-title">No materials listed yet.</p>
+          <p class="empty-text">Start listing materials above to enable circular reuse in your industry.</p>
+        </div>
+
+        <div id="producerListingsTable" style="display: none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Material</th>
+                <th>Category</th>
+                <th>Quantity (kg)</th>
+                <th>Condition</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="producerListingsBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================
+         SCREEN 3: REUSER INTERFACE
+         ==================================== -->
+    <section id="reuserInterface" class="section">
+      <div class="header flex justify-between items-center">
+        <div>
+          <button class="button-secondary button-sm mb-4" onclick="selectRole('back')">← Back</button>
+          <h1 class="text-4xl font-bold">Find Reusable Materials</h1>
+          <p class="text-muted mt-2">Search and request industrial materials available for reuse.</p>
+        </div>
+        <div class="text-right">
+          <div class="badge-tier">Reuser</div>
+          <p class="text-muted text-xs mt-2" id="reuserTierInfo">Basic Plan</p>
+        </div>
+      </div>
+
+      <!-- Success/Error Alerts -->
+      <div class="alert alert-success" id="reuserSuccess">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="reuserSuccessMsg">Request sent to material producer.</span>
+      </div>
+      <div class="alert alert-error" id="reuserError">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <span id="reuserErrorMsg">An error occurred. Please try again.</span>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8 mb-8">
+        <!-- Search Section -->
+        <div class="md:col-span-2">
+          <div class="card">
+            <h2 class="text-2xl font-bold mb-6">Search Materials</h2>
+
+            <form id="reuserForm" class="space-y-6">
+              <!-- Material Type -->
+              <div>
+                <label class="block text-sm font-medium mb-2">Material Type *</label>
+                <select class="select-field w-full" id="reuserCategory" required>
+                  <option value="">Select material type</option>
+                  <option value="plastic">Plastic</option>
+                  <option value="metal">Metal</option>
+                  <option value="glass">Glass</option>
+                  <option value="textile">Textile</option>
+                  <option value="organic">Organic</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <!-- Required Quantity -->
+              <div>
+                <label class="block text-sm font-medium mb-2">Required Quantity (kg) *</label>
+                <input
+                  type="number"
+                  class="input-field w-full"
+                  placeholder="e.g., 250"
+                  id="reuserQuantity"
+                  min="1"
+                  required
+                />
+              </div>
+
+              <button type="submit" class="button-primary w-full">Find Materials</button>
+            </form>
+
+            <div class="border-t border-gray-800 mt-6 pt-4">
+              <p class="text-xs text-muted">
+                <i class="fas fa-info-circle mr-2"></i>
+                We match your requirements with available materials from producers. You'll see the closest matches first.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tier Info Sidebar -->
+        <div class="card">
+          <h3 class="font-bold mb-4">Your Tier</h3>
+          <div class="badge-tier block mb-4">Basic Plan</div>
+          <div class="space-y-4 text-sm">
+            <div>
+              <h4 class="font-semibold mb-1">Requests Available</h4>
+              <p class="text-muted">5 requests/month</p>
+            </div>
+            <div class="border-t border-gray-800 pt-4">
+              <h4 class="font-semibold mb-1">Unlock More</h4>
+              <p class="text-muted text-xs mb-3">Community Plan includes unlimited requests and priority matching.</p>
+              <button class="button-secondary button-sm w-full">Upgrade Plan</button>
+            </div>
+            <div class="border-t border-gray-800 pt-4">
+              <p class="text-xs text-muted">
+                <i class="fas fa-leaf mr-2"></i>
+                Every request supports circular manufacturing and reduces mining/extraction.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Matched Materials Section -->
+      <div class="card animate-in">
+        <h2 class="text-2xl font-bold mb-6">Available Materials</h2>
+
+        <div id="reuserListingsEmpty" class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <p class="empty-title">No materials searched yet.</p>
+          <p class="empty-text">Use the search above to find materials matching your requirements.</p>
+        </div>
+
+        <div id="reuserListingsGrid" style="display: none;">
+          <div class="grid md:grid-cols-2 gap-6" id="reuserListingsBody">
+          </div>
+        </div>
+      </div>
+
+      <!-- Request History Section -->
+      <div class="card mt-8 animate-in">
+        <h2 class="text-2xl font-bold mb-6">Your Requests</h2>
+
+        <div id="reuserHistoryEmpty" class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-history"></i>
+          </div>
+          <p class="empty-title">No requests yet.</p>
+          <p class="empty-text">Material requests will appear here once you've submitted them.</p>
+        </div>
+
+        <div id="reuserHistoryTable" style="display: none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Material</th>
+                <th>Requested Qty (kg)</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="reuserHistoryBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ========================================
+    // APPLICATION STATE
+    // ========================================
+
+    const app = {
+      currentRole: null,
+      userTier: 'basic', // basic, community, industrial
+      listings: [],
+      requests: [],
+      requestHistory: [],
+
+      // Tier Limits
+      tierLimits: {
+        basic: { listings: 3, requests: 5, bulkUpload: false },
+        community: { listings: 50, requests: 50, bulkUpload: false },
+        industrial: { listings: Infinity, requests: Infinity, bulkUpload: true }
+      }
+    };
+
+    // ========================================
+    // ROLE SELECTION
+    // ========================================
+
+    function selectRole(role) {
+      if (role === 'producer') {
+        app.currentRole = 'producer';
+        showSection('producerInterface');
+      } else if (role === 'reuser') {
+        app.currentRole = 'reuser';
+        showSection('reuserInterface');
+      } else if (role === 'back') {
+        app.currentRole = null;
+        showSection('roleSelection');
+      }
+      updateTierInfo();
+    }
+
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(el => {
+        el.classList.remove('active');
+      });
+      document.getElementById(sectionId).classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    // ========================================
+    // PRODUCER LOGIC
+    // ========================================
+
+    document.getElementById('producerForm')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const canAdd = app.listings.length < app.tierLimits[app.userTier].listings;
+      if (!canAdd) {
+        showAlert('producerError', 'Listing limit reached for your tier. Upgrade to list more materials.');
+        return;
+      }
+
+      const name = document.getElementById('materialName').value;
+      const category = document.getElementById('materialCategory').value;
+      const quantity = parseInt(document.getElementById('materialQuantity').value);
+      const condition = document.getElementById('materialCondition').value;
+      const description = document.getElementById('materialDescription').value;
+
+      const listing = {
+        id: Date.now(),
+        name,
+        category,
+        quantity,
+        condition,
+        description,
+        status: 'available',
+        dateAdded: new Date().toLocaleDateString(),
+        reservedQty: 0
+      };
+
+      app.listings.push(listing);
+      renderProducerListings();
+      showAlert('producerSuccess', 'Material listed successfully for reuse.');
+
+      // Reset form
+      this.reset();
+      document.getElementById('materialDescription').value = '';
+    });
+
+    function renderProducerListings() {
+      const tbody = document.getElementById('producerListingsBody');
+      const empty = document.getElementById('producerListingsEmpty');
+      const table = document.getElementById('producerListingsTable');
+
+      if (app.listings.length === 0) {
+        table.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+      table.style.display = 'block';
+      tbody.innerHTML = '';
+
+      app.listings.forEach(listing => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="font-medium">${listing.name}</td>
+          <td>${listing.category.charAt(0).toUpperCase() + listing.category.slice(1)}</td>
+          <td>${listing.quantity}</td>
+          <td>${listing.condition.charAt(0).toUpperCase() + listing.condition.slice(1)}</td>
+          <td><span class="status-pill status-${listing.status}">${listing.status}</span></td>
+          <td class="flex gap-2">
+            <button class="button-secondary button-sm" onclick="editListing(${listing.id})">Edit</button>
+            <button class="button-danger button-sm" onclick="removeListing(${listing.id})">Remove</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function removeListing(id) {
+      if (confirm('Are you sure you want to remove this listing?')) {
+        app.listings = app.listings.filter(l => l.id !== id);
+        renderProducerListings();
+      }
+    }
+
+    function editListing(id) {
+      const listing = app.listings.find(l => l.id === id);
+      if (listing) {
+        document.getElementById('materialName').value = listing.name;
+        document.getElementById('materialCategory').value = listing.category;
+        document.getElementById('materialQuantity').value = listing.quantity;
+        document.getElementById('materialCondition').value = listing.condition;
+        document.getElementById('materialDescription').value = listing.description;
+        removeListing(id);
+        window.scrollTo(0, 0);
+      }
+    }
+
+    // ========================================
+    // REUSER LOGIC
+    // ========================================
+
+    document.getElementById('reuserForm')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const category = document.getElementById('reuserCategory').value;
+      const quantity = parseInt(document.getElementById('reuserQuantity').value);
+
+      if (!category || !quantity) {
+        showAlert('reuserError', 'Please fill in all fields.');
+        return;
+      }
+
+      // Real-time matching
+      const matches = app.listings.filter(
+        l => l.category === category && l.quantity >= quantity && l.status === 'available'
+      );
+
+      renderReuserMatches(matches);
+
+      if (matches.length === 0) {
+        document.getElementById('reuserListingsEmpty').style.display = 'block';
+        document.getElementById('reuserListingsGrid').style.display = 'none';
+        showAlert('reuserError', 'No matching materials available right now. Try adjusting your quantity or category.');
+      } else {
+        document.getElementById('reuserListingsEmpty').style.display = 'none';
+        document.getElementById('reuserListingsGrid').style.display = 'block';
+      }
+    });
+
+    function renderReuserMatches(matches) {
+      const container = document.getElementById('reuserListingsBody');
+      container.innerHTML = '';
+
+      matches.forEach(listing => {
+        const card = document.createElement('div');
+        card.className = 'card animate-in';
+        card.innerHTML = `
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="text-lg font-bold">${listing.name}</h3>
+              <p class="text-muted text-sm">${listing.category.charAt(0).toUpperCase() + listing.category.slice(1)} • Condition: ${listing.condition}</p>
+            </div>
+            <span class="status-pill status-available">Available</span>
+          </div>
+
+          <div class="space-y-3 mb-4 pb-4 border-b border-gray-800">
+            <div class="flex justify-between">
+              <span class="text-muted">Available Quantity</span>
+              <span class="font-semibold">${listing.quantity} kg</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-muted">Condition</span>
+              <span class="font-semibold">${listing.condition}</span>
+            </div>
+            ${listing.description ? `<p class="text-xs text-muted italic">"${listing.description}"</p>` : ''}
+          </div>
+
+          <button class="button-primary w-full" onclick="submitRequest(${listing.id})">Request Material</button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function submitRequest(listingId) {
+      const canRequest = app.requests.length < app.tierLimits[app.userTier].requests;
+      if (!canRequest) {
+        showAlert('reuserError', 'Request limit reached for your tier. Upgrade to submit more requests.');
+        return;
+      }
+
+      const listing = app.listings.find(l => l.id === listingId);
+      if (listing) {
+        const request = {
+          id: Date.now(),
+          materialName: listing.name,
+          quantity: listing.quantity,
+          status: 'requested',
+          date: new Date().toLocaleDateString()
+        };
+
+        app.requests.push(request);
+        app.requestHistory.push(request);
+        listing.status = 'reserved';
+
+        showAlert('reuserSuccess', 'Request sent to material producer. They will contact you within 24-48 hours.');
+        renderReuserHistory();
+        renderProducerListings();
+      }
+    }
+
+    function renderReuserHistory() {
+      const tbody = document.getElementById('reuserHistoryBody');
+      const empty = document.getElementById('reuserHistoryEmpty');
+      const table = document.getElementById('reuserHistoryTable');
+
+      if (app.requestHistory.length === 0) {
+        table.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+      table.style.display = 'block';
+      tbody.innerHTML = '';
+
+      app.requestHistory.forEach(request => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="font-medium">${request.materialName}</td>
+          <td>${request.quantity}</td>
+          <td><span class="status-pill status-${request.status}">${request.status}</span></td>
+          <td>${request.date}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // ========================================
+    // UI UTILITIES
+    // ========================================
+
+    function showAlert(alertId, message) {
+      const alert = document.getElementById(alertId);
+      const messageEl = alert.querySelector('span:last-child');
+      messageEl.textContent = message;
+      alert.style.display = 'block';
+
+      setTimeout(() => {
+        alert.style.display = 'none';
+      }, 5000);
+    }
+
+    function updateTierInfo() {
+      const tier = app.userTier;
+      const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1) + ' Plan';
+
+      if (app.currentRole === 'producer') {
+        document.getElementById('producerTierInfo').textContent = tierLabel;
+      } else if (app.currentRole === 'reuser') {
+        document.getElementById('reuserTierInfo').textContent = tierLabel;
+      }
+    }
+
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+
+    // Add some sample data for demo
+    app.listings = [
+      {
+        id: 1,
+        name: 'Aluminum Offcuts',
+        category: 'metal',
+        quantity: 250,
+        condition: 'clean',
+        description: 'Clean aluminum sheets from fabrication',
+        status: 'available',
+        dateAdded: '2026-01-25',
+        reservedQty: 0
+      },
+      {
+        id: 2,
+        name: 'Plastic Film Waste',
+        category: 'plastic',
+        quantity: 500,
+        condition: 'processing',
+        description: 'Post-industrial plastic film, requires sorting',
+        status: 'available',
+        dateAdded: '2026-01-24',
+        reservedQty: 0
+      }
+    ];
+
+    renderProducerListings();
+    updateTierInfo();
+  </script>
+</body>
+</html>

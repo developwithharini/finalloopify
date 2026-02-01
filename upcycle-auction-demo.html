@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upcycle Auction - Test & Demo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #000000 0%, #000000 100%);
+      color: #f5f5f5;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #6b9e83;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .test-panel {
+      background: #000000;
+      border: 1px solid #003300;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    h2 {
+      font-size: 16px;
+      color: #6b9e83;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .test-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background: #6b9e83;
+      color: #fff;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background: #5a8e72;
+      transform: translateY(-2px);
+    }
+
+    button.secondary {
+      background: transparent;
+      border: 1px solid #6b9e83;
+      color: #6b9e83;
+    }
+
+    button.secondary:hover {
+      background: rgba(0, 255, 0, 0.1);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .stat-box {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid #6b9e83;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #6b9e83;
+      margin: 8px 0;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .log {
+      background: #000000;
+      border: 1px solid #003300;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Monaco', monospace;
+      font-size: 12px;
+      height: 300px;
+      overflow-y: auto;
+      color: #6b9e83;
+    }
+
+    .log-entry {
+      padding: 4px 0;
+      border-bottom: 1px solid #000000;
+    }
+
+    .log-entry.success { color: #6b9e83; }
+    .log-entry.error { color: #ff6b6b; }
+    .log-entry.warning { color: #ffd93d; }
+    .log-entry.info { color: #999; }
+
+    .auction-preview {
+      background: #000000;
+      border: 1px solid #003300;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 12px 0;
+    }
+
+    .auction-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #003300;
+    }
+
+    .auction-item:last-child {
+      border-bottom: none;
+    }
+
+    .item-name {
+      flex: 1;
+      color: #f5f5f5;
+      font-weight: 600;
+    }
+
+    .item-bid {
+      color: #6b9e83;
+      font-weight: 700;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .item-time {
+      color: #999;
+      font-size: 12px;
+      min-width: 100px;
+      text-align: right;
+    }
+
+    .code {
+      background: #000000;
+      border-left: 3px solid #6b9e83;
+      padding: 12px;
+      border-radius: 4px;
+      font-family: 'Monaco', monospace;
+      font-size: 12px;
+      color: #6b9e83;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <i class="fas fa-gavel"></i> Upcycle Auction System - Test & Demo
+    </h1>
+
+    <!-- Setup Panel -->
+    <div class="test-panel">
+      <h2><i class="fas fa-wrench"></i> Setup & Configuration</h2>
+      
+      <div class="test-buttons">
+        <button onclick="initializeTestData()">
+          <i class="fas fa-database"></i> Load Sample Data
+        </button>
+        <button onclick="addOldItems()">
+          <i class="fas fa-plus"></i> Add 30+ Day Items
+        </button>
+        <button onclick="forceEligibility()">
+          <i class="fas fa-fast-forward"></i> Force Eligibility Check
+        </button>
+        <button class="secondary" onclick="clearAllData()">
+          <i class="fas fa-trash"></i> Clear All Data
+        </button>
+      </div>
+
+      <div class="code">
+// Initialize Auction System<br>
+const auction = new UpcycleAuctionSystem();<br>
+const ui = new UpcycleAuctionUI(auction);
+      </div>
+    </div>
+
+    <!-- Stats Panel -->
+    <div class="test-panel">
+      <h2><i class="fas fa-chart-bar"></i> Auction Statistics</h2>
+      
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">Active Auctions</div>
+          <div class="stat-value" id="active-count">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Total Bids</div>
+          <div class="stat-value" id="total-bids">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Completed</div>
+          <div class="stat-value" id="completed-count">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Points Auctioned</div>
+          <div class="stat-value" id="total-points">0</div>
+        </div>
+      </div>
+
+      <button onclick="refreshStats()" style="width: 100%; margin-top: 12px;">
+        <i class="fas fa-sync"></i> Refresh Statistics
+      </button>
+    </div>
+
+    <!-- Active Auctions -->
+    <div class="test-panel">
+      <h2><i class="fas fa-fire"></i> Active Auctions</h2>
+      <div class="auction-preview" id="active-auctions">
+        <p style="color: #999; text-align: center; padding: 20px;">No active auctions</p>
+      </div>
+    </div>
+
+    <!-- Bidding Test -->
+    <div class="test-panel">
+      <h2><i class="fas fa-gavel"></i> Test Bidding</h2>
+      
+      <div style="margin-bottom: 16px;">
+        <label style="color: #999; font-size: 12px; display: block; margin-bottom: 8px;">Select Item:</label>
+        <select id="item-select" style="background: #000000; color: #f5f5f5; border: 1px solid #003300; padding: 8px; border-radius: 6px; width: 100%; margin-bottom: 12px;">
+          <option>-- Choose an auction --</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label style="color: #999; font-size: 12px; display: block; margin-bottom: 8px;">Bid Amount (EcoPoints):</label>
+        <input type="number" id="bid-amount" style="background: #000000; color: #f5f5f5; border: 1px solid #003300; padding: 8px; border-radius: 6px; width: 100%; margin-bottom: 12px;" placeholder="10" min="5">
+      </div>
+
+      <button onclick="testBid()" style="width: 100%;">
+        <i class="fas fa-gavel"></i> Place Test Bid
+      </button>
+    </div>
+
+    <!-- Event Log -->
+    <div class="test-panel">
+      <h2><i class="fas fa-list"></i> Event Log</h2>
+      <div class="log" id="log">
+        <div class="log-entry info">✅ Test panel initialized</div>
+      </div>
+    </div>
+
+    <!-- Documentation -->
+    <div class="test-panel">
+      <h2><i class="fas fa-book"></i> How Upcycle Auctions Work</h2>
+      
+      <div style="color: #999; font-size: 13px; line-height: 1.6;">
+        <p><strong style="color: #6b9e83;">1. Item Eligibility</strong></p>
+        <p>Items automatically move to auction when they haven't been redeemed for 30+ days.</p>
+
+        <p style="margin-top: 12px;"><strong style="color: #6b9e83;">2. Auction Duration</strong></p>
+        <p>Each auction lasts 72 hours (3 days) from when it's created.</p>
+
+        <p style="margin-top: 12px;"><strong style="color: #6b9e83;">3. Bidding Rules</strong></p>
+        <ul style="margin-left: 16px;">
+          <li>Starting bid: 5 EcoPoints</li>
+          <li>Minimum increment: 1 EcoPoint</li>
+          <li>Users must have sufficient balance</li>
+          <li>Same user can place multiple bids</li>
+        </ul>
+
+        <p style="margin-top: 12px;"><strong style="color: #6b9e83;">4. Auction End</strong></p>
+        <p>Highest bidder wins and EcoPoints are automatically deducted. Item marked for pickup at original hub.</p>
+
+        <p style="margin-top: 12px;"><strong style="color: #6b9e83;">5. Storage</strong></p>
+        <p>All auction data stored in <code style="background: #000000; padding: 2px 6px; border-radius: 3px;">upcycle_auctions</code> localStorage key.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="ecopoints-system.js"></script>
+  <script src="upcycle-auction-system.js"></script>
+  <script src="upcycle-auction-ui.js"></script>
+
+  <script>
+    const log = document.getElementById('log');
+
+    function logEvent(message, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      log.insertBefore(entry, log.firstChild);
+      if (log.children.length > 100) log.removeChild(log.lastChild);
+    }
+
+    function initializeTestData() {
+      // Create sample thrift items
+      const sampleItems = [
+        { itemId: 'item1', itemName: 'Vintage Blue Jacket', category: 'Clothing', imageUrl: 'https://via.placeholder.com/300x300?text=Jacket', uploadedDate: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString(), hubId: 'hub1', hubName: 'Downtown Hub', availabilityStatus: 'available' },
+        { itemId: 'item2', itemName: 'Wooden Desk', category: 'Furniture', imageUrl: 'https://via.placeholder.com/300x300?text=Desk', uploadedDate: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(), hubId: 'hub2', hubName: 'East Side Hub', availabilityStatus: 'available' },
+        { itemId: 'item3', itemName: 'Ceramic Vase', category: 'Decor', imageUrl: 'https://via.placeholder.com/300x300?text=Vase', uploadedDate: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString(), hubId: 'hub1', hubName: 'Downtown Hub', availabilityStatus: 'available' }
+      ];
+
+      localStorage.setItem('thriftloop_items', JSON.stringify(sampleItems));
+      logEvent('✅ Sample thrift items loaded', 'success');
+      
+      // Reinitialize auction system
+      if (typeof upcycleAuction !== 'undefined') {
+        upcycleAuction.checkAndMoveExpiredItems();
+        logEvent('✅ Auction eligibility check completed', 'success');
+        refreshStats();
+        populateAuctionSelect();
+      }
+    }
+
+    function addOldItems() {
+      const existing = JSON.parse(localStorage.getItem('thriftloop_items') || '[]');
+      const newItem = {
+        itemId: `item${Date.now()}`,
+        itemName: `Vintage Item ${existing.length + 1}`,
+        category: 'Misc',
+        imageUrl: 'https://via.placeholder.com/300x300?text=Item',
+        uploadedDate: new Date(Date.now() - 32 * 24 * 60 * 60 * 1000).toISOString(),
+        hubId: 'hub' + (Math.floor(Math.random() * 3) + 1),
+        hubName: ['Downtown Hub', 'East Side Hub', 'West Side Hub'][Math.floor(Math.random() * 3)],
+        availabilityStatus: 'available'
+      };
+      existing.push(newItem);
+      localStorage.setItem('thriftloop_items', JSON.stringify(existing));
+      
+      if (typeof upcycleAuction !== 'undefined') {
+        upcycleAuction.checkAndMoveExpiredItems();
+      }
+      
+      logEvent(`✅ Added old item: ${newItem.itemName}`, 'success');
+      refreshStats();
+      populateAuctionSelect();
+    }
+
+    function forceEligibility() {
+      if (typeof upcycleAuction !== 'undefined') {
+        upcycleAuction.checkAndMoveExpiredItems();
+        logEvent('🔄 Eligibility check forced', 'warning');
+        refreshStats();
+      }
+    }
+
+    function clearAllData() {
+      if (confirm('Clear all auction data?')) {
+        localStorage.removeItem('upcycle_auctions');
+        localStorage.removeItem('thriftloop_items');
+        logEvent('🗑️ All data cleared', 'warning');
+        refreshStats();
+      }
+    }
+
+    function refreshStats() {
+      if (typeof upcycleAuction === 'undefined') {
+        logEvent('⚠️ Auction system not initialized', 'error');
+        return;
+      }
+
+      const stats = upcycleAuction.getStats();
+      document.getElementById('active-count').textContent = stats.activeAuctions;
+      document.getElementById('total-bids').textContent = stats.totalBidsPlaced;
+      document.getElementById('completed-count').textContent = stats.completedAuctions;
+      document.getElementById('total-points').textContent = stats.totalPointsAuctioned;
+
+      // Update active auctions display
+      const activeAuctions = upcycleAuction.getActiveAuctions();
+      const container = document.getElementById('active-auctions');
+      
+      if (activeAuctions.length === 0) {
+        container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No active auctions</p>';
+      } else {
+        container.innerHTML = activeAuctions.map(a => `
+          <div class="auction-item">
+            <div class="item-name">${a.itemName}</div>
+            <div class="item-bid">${a.currentBid} pts</div>
+            <div class="item-time">${a.timeRemaining}</div>
+          </div>
+        `).join('');
+      }
+
+      logEvent('📊 Stats refreshed', 'info');
+    }
+
+    function populateAuctionSelect() {
+      if (typeof upcycleAuction === 'undefined') return;
+
+      const select = document.getElementById('item-select');
+      const active = upcycleAuction.getActiveAuctions();
+      
+      select.innerHTML = '<option>-- Choose an auction --</option>';
+      active.forEach(a => {
+        const option = document.createElement('option');
+        option.value = a.itemId;
+        option.textContent = `${a.itemName} (${a.currentBid} pts)`;
+        select.appendChild(option);
+      });
+    }
+
+    function testBid() {
+      const itemId = document.getElementById('item-select').value;
+      const bidAmount = parseInt(document.getElementById('bid-amount').value);
+
+      if (!itemId || itemId === '') {
+        logEvent('❌ Please select an item', 'error');
+        return;
+      }
+
+      if (!bidAmount || bidAmount < 5) {
+        logEvent('❌ Bid must be at least 5 EcoPoints', 'error');
+        return;
+      }
+
+      const result = upcycleAuction.placeBid(
+        itemId,
+        'test_user',
+        'Test User',
+        bidAmount
+      );
+
+      if (result.success) {
+        logEvent(`✅ ${result.message}`, 'success');
+        document.getElementById('bid-amount').value = (bidAmount + 1).toString();
+        refreshStats();
+      } else {
+        logEvent(`❌ ${result.message}`, 'error');
+      }
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      logEvent('🎯 Upcycle Auction Test Panel Ready', 'success');
+      refreshStats();
+      populateAuctionSelect();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collection Booking - Loopify</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="collection-hub-system.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background-color: #000;
+      color: #f5f5f5;
+    }
+
+    .sage-accent { color: #6b9e83; }
+    .sage-bg { background-color: #6b9e83; }
+    .sage-border { border-color: #6b9e83; }
+
+    .button-primary {
+      background-color: #6b9e83;
+      color: #fff;
+      padding: 12px 32px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .button-primary:hover:not(:disabled) {
+      background-color: #5a8e72;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(0, 255, 0, 0.2);
+    }
+
+    .button-primary:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .button-secondary {
+      background-color: transparent;
+      color: #6b9e83;
+      border: 1.5px solid #6b9e83;
+      padding: 12px 32px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .button-secondary:hover:not(:disabled) {
+      background-color: rgba(0, 255, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #6b9e83;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #f5f5f5;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: #6b9e83;
+      box-shadow: 0 0 0 3px rgba(0, 255, 0, 0.1);
+    }
+
+    .card {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .text-muted { color: #999; }
+
+    .step-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .step-indicator::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: #333;
+      z-index: 0;
+    }
+
+    .step {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .step-number {
+      width: 40px;
+      height: 40px;
+      background-color: #333;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .step.active .step-number {
+      background-color: #6b9e83;
+      color: #000;
+    }
+
+    .step.completed .step-number {
+      background-color: #6b9e83;
+      color: #000;
+    }
+
+    .step-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #999;
+      text-align: center;
+    }
+
+    .hub-info-box {
+      background-color: #0a0a0a;
+      border: 1px solid #6b9e83;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .hub-info-box h4 {
+      color: #6b9e83;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .timeline {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .timeline-dot {
+      width: 12px;
+      height: 12px;
+      background-color: #6b9e83;
+      border-radius: 50%;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+
+    .timeline-content {
+      flex: 1;
+    }
+
+    .timeline-content p {
+      margin-bottom: 4px;
+    }
+
+    .success-box {
+      background-color: rgba(0, 255, 0, 0.1);
+      border: 1px solid #6b9e83;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .success-box i {
+      font-size: 48px;
+      color: #6b9e83;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .header-bar {
+      background-color: #0a0a0a;
+      border-bottom: 1px solid #333;
+      padding: 20px;
+    }
+
+    .container-max {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .date-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .date-option {
+      aspect-ratio: 1;
+      border: 1px solid #333;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 8px;
+    }
+
+    .date-option:hover {
+      border-color: #6b9e83;
+    }
+
+    .date-option.selected {
+      background-color: #6b9e83;
+      border-color: #6b9e83;
+      color: #000;
+    }
+
+    .date-day {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+    }
+
+    .date-option.selected .date-day {
+      color: #000;
+    }
+
+    .date-num {
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header-bar">
+    <div class="container-max">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <a href="collection-hub-selector.html" style="color: #6b9e83; text-decoration: none;">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1 style="font-size: 28px; font-weight: bold;">Schedule Collection Pickup</h1>
+      </div>
+      <div class="hub-info-box" id="hubInfoBox">
+        <h4>Selected Hub</h4>
+        <p class="text-muted" id="hubName">Loading hub information...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container-max" style="padding: 40px 20px;">
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+      <div class="step active" id="step1">
+        <div class="step-number">1</div>
+        <div class="step-label">Select Date</div>
+      </div>
+      <div class="step" id="step2">
+        <div class="step-number">2</div>
+        <div class="step-label">Select Time</div>
+      </div>
+      <div class="step" id="step3">
+        <div class="step-number">3</div>
+        <div class="step-label">Item Details</div>
+      </div>
+      <div class="step" id="step4">
+        <div class="step-number">4</div>
+        <div class="step-label">Confirm</div>
+      </div>
+    </div>
+
+    <!-- Step 1: Select Date -->
+    <div id="stepContent1" class="card" style="margin-bottom: 24px;">
+      <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">
+        <i class="fas fa-calendar sage-accent"></i> When do you want to schedule?
+      </h2>
+      
+      <div class="form-group">
+        <label class="form-label">Available Collection Days</label>
+        <div class="date-grid" id="dateGrid">
+          <!-- Dates will be populated here -->
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <button class="button-primary" onclick="nextStep(1)" id="dateBtn1" disabled>
+          Next <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Select Time -->
+    <div id="stepContent2" class="card" style="margin-bottom: 24px; display: none;">
+      <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">
+        <i class="fas fa-clock sage-accent"></i> What time works best?
+      </h2>
+      
+      <div class="form-group">
+        <label class="form-label">Select Time Slot</label>
+        <div id="timeSlots" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-bottom: 24px;">
+          <!-- Time slots will be populated here -->
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <button class="button-secondary" onclick="previousStep(2)">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <button class="button-primary" onclick="nextStep(2)" id="timeBtn2" disabled">
+          Next <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3: Item Details -->
+    <div id="stepContent3" class="card" style="margin-bottom: 24px; display: none;">
+      <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">
+        <i class="fas fa-box sage-accent"></i> Tell us about your items
+      </h2>
+      
+      <div class="form-group">
+        <label class="form-label">Item Category</label>
+        <select class="form-select" id="itemCategory">
+          <option value="">Select category...</option>
+          <option value="clothing">Clothing & Textiles</option>
+          <option value="electronics">Electronics</option>
+          <option value="books">Books & Documents</option>
+          <option value="furniture">Furniture</option>
+          <option value="plastic">Plastic Items</option>
+          <option value="metal">Metal & Aluminum</option>
+          <option value="glass">Glass & Ceramics</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Number of Items</label>
+        <input type="number" class="form-input" id="itemCount" placeholder="e.g., 5" min="1" max="1000" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Item Description</label>
+        <textarea class="form-textarea" id="itemDescription" placeholder="Describe your items (condition, size, etc.)" rows="4"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Special Handling Required?</label>
+        <div style="display: flex; gap: 16px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" id="fragile" />
+            <span>Fragile Items</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" id="heavy" />
+            <span>Heavy Items</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" id="bulky" />
+            <span>Bulky Items</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <button class="button-secondary" onclick="previousStep(3)">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <button class="button-primary" onclick="nextStep(3)" id="itemsBtn3" disabled>
+          Next <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 4: Confirm Booking -->
+    <div id="stepContent4" class="card" style="margin-bottom: 24px; display: none;">
+      <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">
+        <i class="fas fa-check-circle sage-accent"></i> Confirm Your Booking
+      </h2>
+
+      <div id="bookingSummary" style="background-color: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+        <!-- Summary will be populated here -->
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Your Name</label>
+        <input type="text" class="form-input" id="userName" placeholder="Full name" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" class="form-input" id="userPhone" placeholder="+91 XXXXX XXXXX" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="userEmail" placeholder="your@email.com" />
+      </div>
+
+      <div class="form-group">
+        <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
+          <input type="checkbox" id="agreeTerms" style="margin-top: 4px;" />
+          <span style="font-size: 14px;">
+            I agree to the collection terms and conditions. I understand that items will be collected at the scheduled time.
+          </span>
+        </label>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <button class="button-secondary" onclick="previousStep(4)">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <button class="button-primary" onclick="confirmBooking()" id="confirmBtn" disabled>
+          <i class="fas fa-check"></i> Confirm Booking
+        </button>
+      </div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successContent" style="display: none;">
+      <div class="success-box">
+        <i class="fas fa-check-circle"></i>
+        <h2 style="font-size: 28px; font-weight: bold; margin-bottom: 16px;">Booking Confirmed!</h2>
+        <p class="text-muted" style="margin-bottom: 24px;">
+          Your collection pickup has been scheduled. You'll receive a confirmation email and SMS shortly.
+        </p>
+        
+        <div style="background-color: #0a0a0a; border-radius: 8px; padding: 20px; text-align: left; margin-bottom: 24px;">
+          <h4 style="color: #6b9e83; margin-bottom: 16px;">Booking Details</h4>
+          <div id="confirmationDetails" style="font-size: 14px; line-height: 1.8;">
+            <!-- Details will be populated here -->
+          </div>
+        </div>
+
+        <p style="color: #6b9e83; font-weight: 600; margin-bottom: 24px;">
+          <i class="fas fa-info-circle"></i> Your booking reference: <span id="bookingRef">LOAD-2026...</span>
+        </p>
+
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <button class="button-primary" onclick="window.location.href='collection-hub-selector.html'">
+            <i class="fas fa-home"></i> Back to Hubs
+          </button>
+          <button class="button-secondary" onclick="downloadConfirmation()">
+            <i class="fas fa-download"></i> Download Confirmation
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    let bookingData = {
+      hubId: null,
+      date: null,
+      time: null,
+      itemCategory: null,
+      itemCount: null,
+      itemDescription: null,
+      specialHandling: {}
+    };
+
+    // Initialize on page load
+    function initialize() {
+      const params = new URLSearchParams(window.location.search);
+      const hubId = params.get('hub') || localStorage.getItem('selectedHub')?.split('"id":"')[1]?.split('"')[0];
+      
+      if (!hubId) {
+        alert('Please select a hub first');
+        window.location.href = 'collection-hub-selector.html';
+        return;
+      }
+
+      bookingData.hubId = hubId;
+      const hub = collectionHubSystem.getHubById(hubId);
+      
+      if (hub) {
+        document.getElementById('hubName').textContent = `${hub.name} - ${hub.area} (${hub.distance} km away)`;
+        populateDateSlots(hub);
+      }
+
+      // Add event listeners
+      document.getElementById('itemCount').addEventListener('change', validateStep3);
+      document.getElementById('itemCategory').addEventListener('change', validateStep3);
+      document.getElementById('userName').addEventListener('input', validateStep4);
+      document.getElementById('userPhone').addEventListener('input', validateStep4);
+      document.getElementById('userEmail').addEventListener('input', validateStep4);
+      document.getElementById('agreeTerms').addEventListener('change', validateStep4);
+    }
+
+    // Populate date slots
+    function populateDateSlots(hub) {
+      const dateGrid = document.getElementById('dateGrid');
+      const today = new Date();
+      const dates = [];
+
+      for (let i = 1; i <= 14; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() + i);
+        const day = date.toLocaleDateString('en-US', { weekday: 'short' });
+        const dateNum = date.getDate();
+        const isAvailable = hub.collectionDays.includes(day.replace('.', ''));
+
+        if (isAvailable) {
+          const button = document.createElement('button');
+          button.className = 'date-option';
+          button.innerHTML = `<div class="date-day">${day}</div><div class="date-num">${dateNum}</div>`;
+          button.onclick = () => selectDate(date, button);
+          dateGrid.appendChild(button);
+        }
+      }
+    }
+
+    // Select date
+    function selectDate(date, element) {
+      document.querySelectorAll('.date-option').forEach(btn => btn.classList.remove('selected'));
+      element.classList.add('selected');
+      bookingData.date = date.toISOString().split('T')[0];
+      document.getElementById('dateBtn1').disabled = false;
+      populateTimeSlots();
+    }
+
+    // Populate time slots
+    function populateTimeSlots() {
+      const hub = collectionHubSystem.getHubById(bookingData.hubId);
+      if (!hub) return;
+
+      const timeSlots = document.getElementById('timeSlots');
+      timeSlots.innerHTML = '';
+
+      const [startH, startM] = hub.collectionHours.start.split(':').map(Number);
+      const [endH, endM] = hub.collectionHours.end.split(':').map(Number);
+
+      for (let hour = startH; hour <= endH; hour++) {
+        const time = `${String(hour).padStart(2, '0')}:00`;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.style.cssText = 'padding: 12px; border: 1px solid #333; border-radius: 8px; background-color: #1a1a1a; color: #f5f5f5; cursor: pointer; transition: all 0.3s ease;';
+        button.textContent = time;
+        button.onmouseover = () => button.style.borderColor = '#6b9e83';
+        button.onmouseout = () => button.style.borderColor = '#333';
+        button.onclick = () => selectTime(time, button);
+        timeSlots.appendChild(button);
+      }
+    }
+
+    // Select time
+    function selectTime(time, element) {
+      document.querySelectorAll('#timeSlots button').forEach(btn => {
+        btn.style.backgroundColor = '#1a1a1a';
+        btn.style.color = '#f5f5f5';
+      });
+      element.style.backgroundColor = '#6b9e83';
+      element.style.color = '#000';
+      bookingData.time = time;
+      document.getElementById('timeBtn2').disabled = false;
+    }
+
+    // Validate step 3
+    function validateStep3() {
+      const valid = document.getElementById('itemCategory').value && document.getElementById('itemCount').value;
+      document.getElementById('itemsBtn3').disabled = !valid;
+    }
+
+    // Validate step 4
+    function validateStep4() {
+      const valid = document.getElementById('userName').value.trim() &&
+                   document.getElementById('userPhone').value.trim() &&
+                   document.getElementById('userEmail').value.trim() &&
+                   document.getElementById('agreeTerms').checked;
+      document.getElementById('confirmBtn').disabled = !valid;
+    }
+
+    // Next step
+    function nextStep(step) {
+      if (step === 1) {
+        if (!bookingData.date) {
+          alert('Please select a date');
+          return;
+        }
+        updateSteps(2);
+      } else if (step === 2) {
+        if (!bookingData.time) {
+          alert('Please select a time');
+          return;
+        }
+        updateSteps(3);
+      } else if (step === 3) {
+        bookingData.itemCategory = document.getElementById('itemCategory').value;
+        bookingData.itemCount = document.getElementById('itemCount').value;
+        bookingData.itemDescription = document.getElementById('itemDescription').value;
+        bookingData.specialHandling = {
+          fragile: document.getElementById('fragile').checked,
+          heavy: document.getElementById('heavy').checked,
+          bulky: document.getElementById('bulky').checked
+        };
+        updateSteps(4);
+        populateSummary();
+      }
+    }
+
+    // Previous step
+    function previousStep(step) {
+      updateSteps(step - 1);
+    }
+
+    // Update steps display
+    function updateSteps(step) {
+      for (let i = 1; i <= 4; i++) {
+        const content = document.getElementById(`stepContent${i}`);
+        const stepEl = document.getElementById(`step${i}`);
+        
+        if (i < step) {
+          stepEl.classList.add('completed');
+          stepEl.classList.remove('active');
+        } else if (i === step) {
+          stepEl.classList.add('active');
+          stepEl.classList.remove('completed');
+        } else {
+          stepEl.classList.remove('active', 'completed');
+        }
+
+        content.style.display = i === step ? 'block' : 'none';
+      }
+      currentStep = step;
+    }
+
+    // Populate booking summary
+    function populateSummary() {
+      const hub = collectionHubSystem.getHubById(bookingData.hubId);
+      const date = new Date(bookingData.date).toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+
+      document.getElementById('bookingSummary').innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div>
+            <p style="color: #999; font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Hub</p>
+            <p style="font-size: 16px; font-weight: 600;">${hub.name}</p>
+          </div>
+          <div>
+            <p style="color: #999; font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Address</p>
+            <p style="font-size: 14px;">${hub.location}</p>
+          </div>
+          <div>
+            <p style="color: #999; font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Date</p>
+            <p style="font-size: 16px; font-weight: 600;">${date}</p>
+          </div>
+          <div>
+            <p style="color: #999; font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Time</p>
+            <p style="font-size: 16px; font-weight: 600;">${bookingData.time}</p>
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <p style="color: #999; font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Items</p>
+            <p style="font-size: 14px;">${bookingData.itemCount} items - ${bookingData.itemCategory}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Confirm booking
+    function confirmBooking() {
+      const userName = document.getElementById('userName').value;
+      const userPhone = document.getElementById('userPhone').value;
+      const userEmail = document.getElementById('userEmail').value;
+
+      const booking = collectionHubSystem.schedulePickup(bookingData.hubId, {
+        date: bookingData.date,
+        time: bookingData.time,
+        itemCount: bookingData.itemCount,
+        itemCategory: bookingData.itemCategory,
+        itemDescription: bookingData.itemDescription,
+        specialHandling: bookingData.specialHandling,
+        userName,
+        userPhone,
+        userEmail
+      });
+
+      displayConfirmation(booking);
+    }
+
+    // Display confirmation
+    function displayConfirmation(booking) {
+      document.getElementById('stepContent4').style.display = 'none';
+      document.getElementById('successContent').style.display = 'block';
+
+      const hub = collectionHubSystem.getHubById(booking.hubId);
+      const date = new Date(booking.date).toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+
+      document.getElementById('bookingRef').textContent = booking.id.toUpperCase();
+      document.getElementById('confirmationDetails').innerHTML = `
+        <p><strong>Booking Reference:</strong> ${booking.id.toUpperCase()}</p>
+        <p><strong>Hub:</strong> ${hub.name}, ${hub.area}</p>
+        <p><strong>Address:</strong> ${hub.location}</p>
+        <p><strong>Scheduled Date:</strong> ${date}</p>
+        <p><strong>Scheduled Time:</strong> ${booking.time}</p>
+        <p><strong>Items:</strong> ${booking.itemCount} items (${booking.itemCategory})</p>
+        <p><strong>Contact:</strong> ${hub.contact.phone} | ${hub.contact.email}</p>
+      `;
+
+      // Scroll to top
+      window.scrollTo(0, 0);
+    }
+
+    // Download confirmation
+    function downloadConfirmation() {
+      alert('Downloading booking confirmation...\n\nConfirmation PDF will be saved to your downloads folder.');
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', initialize);
+  </script>
+</body>
+</html>

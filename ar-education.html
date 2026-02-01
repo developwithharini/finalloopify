@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WasteLens AR - Interactive Educational Tool</title>
+
+  <!-- TensorFlow.js (Lite version for faster loading) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2"></script>
+  
+  <!-- GSAP for Dynamic Animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: #000;
+      overflow: hidden;
+    }
+    
+    #video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(1.1) contrast(1.05);
+    }
+    
+    /* Dynamic Status Display */
+    #status {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      color: #6b9e83;
+      padding: 15px 20px;
+      border-radius: 12px;
+      font-size: 16px;
+      z-index: 100;
+      font-weight: bold;
+      min-width: 280px;
+      border: 2px solid rgba(0, 255, 0, 0.4);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 4px 20px rgba(0, 255, 0, 0.3);
+      animation: statusPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes statusPulse {
+      0%, 100% { box-shadow: 0 4px 20px rgba(0, 255, 0, 0.3); }
+      50% { box-shadow: 0 4px 30px rgba(0, 255, 0, 0.6); }
+    }
+    
+    #confidence-display {
+      font-size: 13px;
+      color: #00ff88;
+      margin-top: 8px;
+      font-weight: normal;
+      opacity: 0.9;
+      transition: all 0.3s ease;
+    }
+    
+    /* Confidence Progress Bar */
+    #confidence-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(0, 255, 0, 0.2);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    
+    #confidence-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00ff88, #6b9e83);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.5s ease, background 0.3s ease;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    }
+    
+    /* Enhanced AR Card with Dynamic Animations */
+    #animation-container {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px) scale(0.9);
+      background: rgba(0, 0, 0, 0.96);
+      padding: 30px;
+      border-radius: 20px;
+      z-index: 100;
+      display: none;
+      text-align: center;
+      color: #6b9e83;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+      max-width: 450px;
+      width: 90%;
+      border: 3px solid rgba(0, 255, 0, 0.5);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 40px rgba(0, 255, 0, 0.3);
+      opacity: 0;
+    }
+    
+    /* Dynamic Bin Indicator with Animation */
+    .bin-indicator {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+    }
+    
+    .bin-indicator::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+    
+    .bin-indicator.bottle { background: linear-gradient(90deg, #000000, #000000, #000000); }
+    .bin-indicator.cup { background: linear-gradient(90deg, #ff6600, #ffaa00, #ff6600); }
+    .bin-indicator.bag { background: linear-gradient(90deg, #ff0066, #ff66aa, #ff0066); }
+    .bin-indicator.plastic { background: linear-gradient(90deg, #00ff66, #66ffaa, #00ff66); }
+    .bin-indicator.paper { background: linear-gradient(90deg, #ffff00, #ffff66, #ffff00); }
+    .bin-indicator.clothing { background: linear-gradient(90deg, #ff00ff, #ff66ff, #ff00ff); }
+    .bin-indicator.wire { background: linear-gradient(90deg, #ff6600, #ffaa00, #ff6600); }
+    .bin-indicator.food { background: linear-gradient(90deg, #6b9e83, #66ff66, #6b9e83); }
+    .bin-indicator.default { background: linear-gradient(90deg, #888888, #aaaaaa, #888888); }
+    
+    /* Dynamic Waste Icon */
+    #waste-icon {
+      font-size: 64px;
+      margin-bottom: 15px;
+      display: block;
+      filter: drop-shadow(0 0 20px rgba(0, 255, 0, 0.6));
+      animation: iconFloat 3s ease-in-out infinite;
+    }
+    
+    @keyframes iconFloat {
+      0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+      50% { transform: translateY(-10px) scale(1.05) rotate(5deg); }
+    }
+    
+    #product-title {
+      font-size: 20px;
+      color: #ffff00;
+      margin-bottom: 20px;
+      font-weight: bold;
+      text-shadow: 0 0 15px rgba(255, 255, 0, 0.7);
+      letter-spacing: 1px;
+      animation: titleGlow 2s ease-in-out infinite;
+    }
+    
+    @keyframes titleGlow {
+      0%, 100% { text-shadow: 0 0 15px rgba(255, 255, 0, 0.7); }
+      50% { text-shadow: 0 0 25px rgba(255, 255, 0, 1); }
+    }
+    
+    /* Enhanced Step Animations */
+    .step {
+      padding: 12px 15px;
+      margin: 8px 0;
+      opacity: 0.3;
+      font-size: 15px;
+      border-radius: 8px;
+      transform: translateX(-20px) scale(0.95);
+      border-left: 4px solid transparent;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .step::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(0, 255, 136, 0.2), transparent);
+      transition: width 0.5s ease;
+    }
+    
+    .step.active {
+      opacity: 1;
+      color: #00ff88;
+      font-weight: bold;
+      transform: translateX(0) scale(1);
+      border-left-color: #00ff88;
+      background: rgba(0, 255, 136, 0.15);
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.4), inset 0 0 20px rgba(0, 255, 136, 0.1);
+      animation: stepPulse 0.6s ease-out;
+    }
+    
+    .step.active::before {
+      width: 100%;
+    }
+    
+    @keyframes stepPulse {
+      0% { transform: translateX(0) scale(1); }
+      50% { transform: translateX(5px) scale(1.02); }
+      100% { transform: translateX(0) scale(1); }
+    }
+    
+    #recycled-products {
+      font-size: 14px;
+      color: #6b9e83;
+      margin-top: 20px;
+      font-weight: bold;
+      padding-top: 20px;
+      border-top: 2px solid rgba(0, 255, 0, 0.3);
+      line-height: 1.8;
+      animation: fadeIn 0.8s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Interactive Controls */
+    #control-panel {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 100;
+    }
+    
+    .control-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(0, 255, 0, 0.9);
+      border: 2px solid rgba(0, 255, 0, 0.6);
+      color: #000;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 255, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    
+    .control-btn:hover {
+      background: rgba(0, 255, 0, 1);
+      box-shadow: 0 6px 20px rgba(0, 255, 0, 0.7);
+      transform: scale(1.1);
+    }
+    
+    .control-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Home Button */
+    #home-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(0, 255, 0, 0.9);
+      border: 2px solid rgba(0, 255, 0, 0.6);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 255, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      z-index: 101;
+    }
+
+    #home-btn:hover {
+      background: rgba(0, 255, 0, 1);
+      box-shadow: 0 6px 20px rgba(0, 255, 0, 0.7);
+      transform: scale(1.1);
+    }
+    
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      right: 65px;
+      background: rgba(0, 0, 0, 0.95);
+      color: #6b9e83;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: nowrap;
+      border: 1px solid rgba(0, 255, 0, 0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .control-btn:hover .tooltip {
+      opacity: 1;
+    }
+    
+    /* Detection Stats */
+    #detection-stats {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      color: #6b9e83;
+      padding: 15px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      z-index: 100;
+      border: 2px solid rgba(0, 255, 0, 0.4);
+      font-family: monospace;
+      min-width: 200px;
+    }
+    
+    .stat-row {
+      margin: 5px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .stat-label { color: #00ff88; }
+    .stat-value { color: #ffff00; font-weight: bold; }
+    
+    /* Voice indicator */
+    #voice-indicator {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 100, 0, 0.9);
+      border: 2px solid rgba(255, 100, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      z-index: 100;
+      animation: voicePulse 0.5s infinite;
+    }
+    
+    @keyframes voicePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    #voice-indicator.active {
+      display: flex;
+    }
+    
+    /* Particle Effect Background */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50;
+      overflow: hidden;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(0, 255, 0, 0.6);
+      border-radius: 50%;
+      animation: particleFloat 8s infinite ease-in-out;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+    }
+    
+    @keyframes particleFloat {
+      0% {
+        transform: translateY(100vh) translateX(0) scale(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) translateX(100px) scale(1);
+        opacity: 0;
+      }
+    }
+
+    /* Educational Info Panel */
+    #info-panel {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.95);
+      color: #6b9e83;
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      z-index: 100;
+      border: 2px solid rgba(0, 255, 0, 0.4);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    #info-panel h4 {
+      color: #6b9e83;
+      font-weight: bold;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(0, 255, 0, 0.3);
+      padding-bottom: 8px;
+    }
+
+    #info-panel p {
+      line-height: 1.6;
+      margin-bottom: 8px;
+      color: #ccc;
+    }
+
+    #info-panel .tip {
+      background: rgba(0, 255, 0, 0.1);
+      padding: 8px;
+      border-left: 3px solid #6b9e83;
+      margin-top: 8px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+
+<body>
+<video id="video" autoplay playsinline muted></video>
+
+<!-- Particle Effects -->
+<div class="particles" id="particles"></div>
+
+<!-- Home Button -->
+<button id="home-btn" onclick="goHome()" title="Back to Home">🏠</button>
+
+<div id="status">⏳ Loading...
+  <div id="confidence-display"></div>
+  <div id="confidence-bar"><div id="confidence-fill"></div></div>
+</div>
+
+<div id="animation-container">
+  <div class="bin-indicator"></div>
+  <div id="waste-icon"></div>
+  <div id="product-title"></div>
+  <div id="step-1" class="step">1. COLLECT</div>
+  <div id="step-2" class="step">2. SORT</div>
+  <div id="step-3" class="step">3. PROCESS</div>
+  <div id="step-4" class="step">4. TRANSFORM</div>
+  <div id="step-5" class="step">5. CREATE NEW</div>
+  <div id="recycled-products"></div>
+</div>
+
+<!-- Detection Stats -->
+<div id="detection-stats">
+  <div class="stat-row"><span class="stat-label">Items Detected:</span><span class="stat-value" id="stat-count">0</span></div>
+  <div class="stat-row"><span class="stat-label">Accuracy:</span><span class="stat-value" id="stat-accuracy">--</span></div>
+  <div class="stat-row"><span class="stat-label">Model:</span><span class="stat-value" id="stat-model">Loading...</span></div>
+  <div class="stat-row"><span class="stat-label">FPS:</span><span class="stat-value" id="stat-fps">0</span></div>
+</div>
+
+<!-- Educational Info Panel -->
+<div id="info-panel">
+  <h4>📚 Educational Insights</h4>
+  <div id="info-content">
+    <p>Scan items to learn about their classification and environmental impact!</p>
+  </div>
+</div>
+
+<!-- Control Panel -->
+<div id="control-panel">
+  <button class="control-btn" id="voice-btn" title="Voice feedback">
+    <span class="tooltip">Voice Feedback</span>
+    🔊
+  </button>
+  <button class="control-btn" id="pause-btn" title="Pause detection">
+    <span class="tooltip">Pause Detection</span>
+    ⏸️
+  </button>
+  <button class="control-btn" id="reset-btn" title="Reset stats">
+    <span class="tooltip">Reset Stats</span>
+    🔄
+  </button>
+</div>
+
+<!-- Voice Indicator -->
+<div id="voice-indicator">🎙️</div>
+
+<script>
+// ============================================
+// OPTIMIZED: Performance & Accuracy Configuration
+// ============================================
+const MIN_CONFIDENCE = 0.3;  // Lowered for easier detection
+const SMOOTHING_FRAMES = 8;
+const SMOOTHING_THRESHOLD = 0.75;
+const DETECTION_INTERVAL = 300;  // Balanced: 300ms for speed
+const MAX_DETECTIONS = 10;
+const MAX_PREDICTION_BOXES = 10;  // Limit model output boxes
+
+// ============================================
+// System Variables
+// ============================================
+let model = null;
+let video = null;
+let lastDetectionTime = 0;
+let animationRunning = false;
+let detectionHistory = [];
+let smoothedPrediction = null;
+let detectionCount = 0;
+let totalConfidence = 0;
+let frameCount = 0;
+let lastFrameTime = 0;
+let voiceEnabled = false;
+let detectionPaused = false;
+let modelReady = false;
+let modelLoadProgress = 0;
+
+// ============================================
+// Enhanced Waste Classification Dataset
+// ============================================
+const wasteRecycling = {
+  bottle: { title: '🍾 BOTTLE RECYCLING', products: 'New Bottles • Bags • Containers • Fibers', category: 'bottle' },
+  cup: { title: '🥤 CUP RECYCLING', products: 'New Cups • Utensils • Toys • Insulation', category: 'cup' },
+  bag: { title: '🛍️ BAG RECYCLING', products: 'New Bags • Clothing • Mats • Lumber', category: 'bag' },
+  backpack: { title: '🛍️ BAG RECYCLING', products: 'New Bags • Clothing • Mats • Lumber', category: 'bag' },
+  handbag: { title: '🛍️ BAG RECYCLING', products: 'New Bags • Clothing • Mats • Lumber', category: 'bag' },
+  suitcase: { title: '🛍️ BAG RECYCLING', products: 'New Bags • Clothing • Mats • Lumber', category: 'bag' },
+  luggage: { title: '🛍️ BAG RECYCLING', products: 'New Bags • Clothing • Mats • Lumber', category: 'bag' },
+  plastic: { title: '♻️ PLASTIC RECYCLING', products: 'Containers • Rope • Tiles • Furniture', category: 'plastic' },
+  paper: { title: '📄 PAPER RECYCLING', products: 'Paper • Cardboard • Tissue • Insulation', category: 'paper' },
+  book: { title: '📄 PAPER RECYCLING', products: 'Paper • Cardboard • Tissue • Insulation', category: 'paper' },
+  cardboard: { title: '📄 PAPER RECYCLING', products: 'Paper • Cardboard • Tissue • Insulation', category: 'paper' },
+  cloth: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  clothing: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  shirt: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  pants: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  dress: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  jacket: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  coat: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  sweater: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  tie: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  sock: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  shoe: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  hat: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  cap: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  scarf: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  glove: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  jeans: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  underwear: { title: '👔 CLOTHING RECYCLING', products: 'New Garments • Upholstery • Rugs • Insulation', category: 'clothing' },
+  wire: { title: '⚡ E-WASTE RECYCLING', products: 'Copper • Aluminum • Metals • Electronics', category: 'wire' },
+  electronics: { title: '⚡ E-WASTE RECYCLING', products: 'Copper • Aluminum • Metals • Electronics', category: 'wire' },
+  metal: { title: '⚡ E-WASTE RECYCLING', products: 'Copper • Aluminum • Metals • Electronics', category: 'wire' },
+  food: { title: '🍽️ FOOD WASTE', products: 'Compost • Fertilizer • Biogas • Animal Feed', category: 'food' },
+  banana: { title: '🍽️ FOOD WASTE', products: 'Compost • Fertilizer • Biogas • Animal Feed', category: 'food' },
+  apple: { title: '🍽️ FOOD WASTE', products: 'Compost • Fertilizer • Biogas • Animal Feed', category: 'food' },
+  broccoli: { title: '🍽️ FOOD WASTE', products: 'Compost • Fertilizer • Biogas • Animal Feed', category: 'food' },
+  orange: { title: '🍽️ FOOD WASTE', products: 'Compost • Fertilizer • Biogas • Animal Feed', category: 'food' },
+  potato: { title: '🍽️ FOOD WASTE', products: 'Compost • Fertilizer • Biogas • Animal Feed', category: 'food' },
+  default: { title: '♻️ WASTE RECYCLING', products: 'New Products & Materials', category: 'default' }
+};
+
+// Educational Content
+const educationalContent = {
+  bottle: {
+    impact: '♻️ Recycling 1 plastic bottle saves 1.5 liters of oil and prevents 450 years of decomposition.',
+    tips: '💡 Rinse bottles before recycling. Remove caps as they\'re made from different materials.',
+    environmental: '🌍 Plastic bottles take 450+ years to decompose naturally.'
+  },
+  cup: {
+    impact: '♻️ Paper cups recycled reduce water consumption by 600,000+ gallons annually.',
+    tips: '💡 Most paper cups have plastic coating. Check local guidelines for proper disposal.',
+    environmental: '🌍 Ceramic cups can be reused for 100+ years vs single-use cups.'
+  },
+  paper: {
+    impact: '♻️ Recycling 1 ton of paper saves 17 trees and 7,000 gallons of water.',
+    tips: '💡 Keep paper dry. Separate cardboard and flatten for better recycling.',
+    environmental: '🌍 Recycled paper reduces CO2 emissions by 330 lbs compared to new production.'
+  },
+  plastic: {
+    impact: '♻️ Plastic recycling reduces landfill waste by 25+ million tons per year.',
+    tips: '💡 Identify the plastic number (1-7). Different types require different handling.',
+    environmental: '🌍 85% of plastic waste ends up in landfills or oceans.'
+  },
+  clothing: {
+    impact: '♻️ Textile recycling prevents 92 lbs of waste per person yearly.',
+    tips: '💡 Donate wearable clothes. Recycle damaged items at specialized facilities.',
+    environmental: '🌍 Fast fashion produces 92 million tons of textile waste annually.'
+  },
+  food: {
+    impact: '🌱 Composted food waste reduces methane emissions by 75% vs landfill.',
+    tips: '💡 All organic waste composts: fruits, vegetables, coffee grounds, leaves.',
+    environmental: '🌍 Composting returns nutrients to soil naturally, reducing fertilizer needs.'
+  },
+  wire: {
+    impact: '⚡ E-waste recycling recovers 95% of valuable materials like copper and gold.',
+    tips: '💡 Never dispose of electronics in regular trash. Take to certified e-waste facilities.',
+    environmental: '🌍 1 ton of e-waste contains more gold than 17 tons of ore.'
+  }
+};
+
+// ============================================
+// Create Particle Effects
+// ============================================
+function createParticles() {
+  const particlesContainer = document.getElementById('particles');
+  for (let i = 0; i < 20; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 8 + 's';
+    particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+    particlesContainer.appendChild(particle);
+  }
+}
+
+// ============================================
+// Navigation
+// ============================================
+function goHome() {
+  window.location.href = 'index.html';
+}
+
+// ============================================
+// Optimized Model Loading (Lazy Load)
+// ============================================
+async function loadModelInBackground() {
+  try {
+    console.log('📦 Loading COCO-SSD model in background...');
+    updateStatus('⏳ Initializing AI model...', 'info');
+    
+    // Load with caching enabled
+    model = await cocoSsd.load({ maxNumBoxes: 10 });
+    modelReady = true;
+    console.log('✅ Model loaded and ready');
+    updateStatus('✅ Model ready!', 'success');
+    
+  } catch (err) {
+    console.error('❌ Model load error:', err);
+    updateStatus('❌ Model load failed: ' + err.message, 'error');
+  }
+}
+
+// ============================================
+// Optimized Initialization (Fast UI, Async Model)
+// ============================================
+async function init() {
+  try {
+    console.log('🚀 Starting AR Education Module...');
+    updateStatus('⏳ Requesting camera access...', 'info');
+    updateStats('Initializing...', 0, 0);
+    
+    // Request camera FIRST (faster than loading model)
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { 
+        facingMode: 'environment',
+        width: { ideal: 640 },
+        height: { ideal: 480 }
+      }
+    });
+    
+    console.log('✅ Camera granted');
+    video = document.getElementById('video');
+    video.srcObject = stream;
+    
+    // Create particles while camera loads
+    createParticles();
+    
+    // Wait for video metadata, then start loading model in background
+    video.addEventListener('loadedmetadata', () => {
+      console.log('✅ Video ready');
+      updateStatus('⏳ Loading AI model (may take 10-15 seconds)...', 'info');
+      document.getElementById('stat-model').textContent = 'Loading...';
+      
+      // Load model in background without blocking UI
+      loadModelInBackground().then(() => {
+        updateStatus('✅ Ready - Point at waste!', 'success');
+        document.getElementById('stat-model').textContent = 'COCO-SSD';
+        console.log('🎯 Starting detection loop');
+        detectWaste();
+      });
+      
+    }, { once: true });
+    
+  } catch (err) {
+    console.error('❌ Init error:', err);
+    updateStatus('❌ ' + err.message, 'error');
+  }
+}
+
+// ============================================
+// Lightweight Model Loading with Progress
+// ============================================
+async function preloadModel() {
+  // Silent background preload if user revisits page
+  try {
+    if (!model && !modelReady) {
+      model = await cocoSsd.load({ maxNumBoxes: 10 });
+      modelReady = true;
+    }
+  } catch (e) {
+    console.warn('Silent preload failed:', e);
+  }
+}
+
+// ============================================
+// Optimized Smoothing Algorithm
+// ============================================
+function smoothDetections(predictions) {
+  const validPredictions = predictions
+    .filter(p => p.score >= MIN_CONFIDENCE * 0.9)
+    .slice(0, MAX_DETECTIONS);
+  
+  if (validPredictions.length === 0) {
+    detectionHistory = [];
+    smoothedPrediction = null;
+    return null;
+  }
+  
+  const bestPrediction = validPredictions.reduce((best, current) => 
+    current.score > best.score ? current : best
+  );
+  
+  detectionHistory.push({
+    class: bestPrediction.class.toLowerCase(),
+    score: bestPrediction.score,
+    timestamp: Date.now()
+  });
+  
+  if (detectionHistory.length > SMOOTHING_FRAMES) {
+    detectionHistory.shift();
+  }
+  
+  const classScores = {};
+  detectionHistory.forEach((det) => {
+    if (!classScores[det.class]) {
+      classScores[det.class] = { totalScore: 0, count: 0, confidence: 0 };
+    }
+    classScores[det.class].totalScore += det.score;
+    classScores[det.class].count++;
+  });
+  
+  let bestClass = null;
+  let bestScore = 0;
+  
+  for (const [className, stats] of Object.entries(classScores)) {
+    const avgScore = stats.totalScore / stats.count;
+    const minFrames = Math.max(2, Math.ceil(SMOOTHING_FRAMES * 0.5));
+    
+    if (avgScore > bestScore && stats.count >= minFrames && avgScore >= SMOOTHING_THRESHOLD) {
+      bestScore = avgScore;
+      bestClass = className;
+    }
+  }
+  
+  if (bestClass) {
+    smoothedPrediction = {
+      class: bestClass,
+      score: bestScore,
+      frameCount: detectionHistory.length
+    };
+    return smoothedPrediction;
+  }
+  
+  return null;
+}
+
+// ============================================
+// Detection Loop (Optimized with Model Check)
+// ============================================
+async function detectWaste() {
+  requestAnimationFrame(detectWaste);
+  
+  // Wait for model to be ready
+  if (!modelReady || !video || detectionPaused) return;
+  
+  const now = Date.now();
+  if (now - lastDetectionTime < DETECTION_INTERVAL) return;
+  
+  frameCount++;
+  if (lastFrameTime && now - lastFrameTime >= 1000) {
+    document.getElementById('stat-fps').textContent = frameCount;
+    frameCount = 0;
+    lastFrameTime = now;
+  } else if (!lastFrameTime) {
+    lastFrameTime = now;
+  }
+  
+  try {
+    // Fast inference with cached model
+    const predictions = await model.detect(video);
+    console.log('Predictions:', predictions);
+    updateConfidenceDisplay(predictions);
+
+    const smoothed = smoothDetections(predictions);
+    console.log('Smoothed:', smoothed);
+
+    const wasteItems = predictions.filter(pred => 
+      isWasteItem(pred.class.toLowerCase()) && pred.score >= MIN_CONFIDENCE
+    ).slice(0, MAX_DETECTIONS);
+    console.log('Waste items:', wasteItems);
+
+    let itemToProcess = null;
+    let confidence = 0;
+
+    if (smoothed && isWasteItem(smoothed.class)) {
+      itemToProcess = smoothed.class;
+      confidence = smoothed.score;
+      console.log(`✅ DETECTED: ${smoothed.class} (${(smoothed.score * 100).toFixed(1)}%)`);
+    } else if (wasteItems.length > 0) {
+      const bestItem = wasteItems[0];
+      if (bestItem.score >= MIN_CONFIDENCE) {
+        itemToProcess = bestItem.class.toLowerCase();
+        confidence = bestItem.score;
+        console.log(`Fallback detected: ${itemToProcess} (${(confidence * 100).toFixed(1)}%)`);
+      }
+    }
+
+    if (itemToProcess && !animationRunning && confidence >= MIN_CONFIDENCE) {
+      detectionCount++;
+      totalConfidence += confidence;
+      updateStats(itemToProcess, detectionCount, (totalConfidence / detectionCount) * 100);
+      playRecyclingAnimation(itemToProcess, confidence);
+      updateEducationalInfo(itemToProcess);
+      lastDetectionTime = now;
+
+      // --- Impact Dashboard Sync ---
+      // Increment wasteClassified in localStorage for main app dashboard
+      let impact = JSON.parse(localStorage.getItem('loopify-impact')) || {};
+      impact.wasteClassified = (impact.wasteClassified || 0) + 1;
+      localStorage.setItem('loopify-impact', JSON.stringify(impact));
+
+      if (voiceEnabled) speakFeedback(itemToProcess);
+      console.log('Detection count updated:', detectionCount);
+    } else {
+      console.log('No valid detection this frame.');
+    }
+
+  } catch (err) {
+    console.error('Detection error:', err);
+  }
+}
+
+// ============================================
+// Helper: Check if item is waste
+// ============================================
+function isWasteItem(name) {
+  return name.includes('bottle') || name.includes('cup') || name.includes('bag') ||
+         name.includes('backpack') || name.includes('handbag') || name.includes('suitcase') ||
+         name.includes('luggage') || name.includes('plastic') || name.includes('container') ||
+         name.includes('paper') || name.includes('book') || name.includes('cardboard') ||
+         name.includes('cloth') || name.includes('clothing') || name.includes('shirt') ||
+         name.includes('pants') || name.includes('dress') || name.includes('jacket') ||
+         name.includes('coat') || name.includes('sweater') || name.includes('tie') ||
+         name.includes('sock') || name.includes('shoe') || name.includes('hat') ||
+         name.includes('cap') || name.includes('scarf') || name.includes('glove') ||
+         name.includes('fabric') || name.includes('jeans') || name.includes('underwear') ||
+         name.includes('wire') || name.includes('electronic') || name.includes('phone') ||
+         name.includes('metal') || name.includes('aluminum') || name.includes('food') ||
+         name.includes('banana') || name.includes('apple') || name.includes('orange') ||
+         name.includes('potato') || name.includes('broccoli');
+}
+
+// ============================================
+// Educational Info Update
+// ============================================
+function updateEducationalInfo(wasteType) {
+  const infoContent = document.getElementById('info-content');
+  const category = getWasteCategory(wasteType);
+  const content = educationalContent[category] || educationalContent.bottle;
+  
+  infoContent.innerHTML = `
+    <p><strong>${wasteRecycling[category]?.title || 'Waste Item'}</strong></p>
+    <p>${content.impact}</p>
+    <p>${content.tips}</p>
+    <div class="tip">${content.environmental}</div>
+  `;
+}
+
+function getWasteCategory(wasteType) {
+  const name = wasteType.toLowerCase();
+  if (name.includes('bottle')) return 'bottle';
+  if (name.includes('cup') || name.includes('glass')) return 'cup';
+  if (name.includes('paper') || name.includes('cardboard') || name.includes('book')) return 'paper';
+  if (name.includes('plastic') || name.includes('container')) return 'plastic';
+  if (name.includes('clothing') || name.includes('shirt') || name.includes('pants') || name.includes('dress')) return 'clothing';
+  if (name.includes('wire') || name.includes('electronic') || name.includes('metal')) return 'wire';
+  if (name.includes('food') || name.includes('banana') || name.includes('apple')) return 'food';
+  return 'bottle';
+}
+
+// ============================================
+// Dynamic UI Updates
+// ============================================
+function updateStatus(message, type = 'info') {
+  const statusEl = document.getElementById('status');
+  const colors = { info: '#6b9e83', success: '#00ff88', error: '#ff4444' };
+  statusEl.innerHTML = message + '<div id="confidence-display"></div><div id="confidence-bar"><div id="confidence-fill"></div></div>';
+  statusEl.style.color = colors[type] || colors.info;
+  
+  if (window.gsap) {
+    gsap.fromTo(statusEl, { scale: 0.95 }, { scale: 1, duration: 0.3, ease: 'back.out(1.7)' });
+  }
+}
+
+function updateStats(item, count, avgAccuracy) {
+  document.getElementById('stat-count').textContent = count;
+  document.getElementById('stat-accuracy').textContent = avgAccuracy > 0 ? avgAccuracy.toFixed(1) + '%' : '--';
+}
+
+function updateConfidenceDisplay(predictions) {
+  const confidenceDisplay = document.getElementById('confidence-display');
+  const confidenceFill = document.getElementById('confidence-fill');
+  
+  if (predictions.length > 0) {
+    const topPred = predictions[0];
+    const percent = Math.round(topPred.score * 100);
+    const color = topPred.score >= MIN_CONFIDENCE ? '#00ff88' : '#ffaa00';
+    
+    confidenceDisplay.textContent = `🔍 ${topPred.class}: ${percent}%`;
+    confidenceDisplay.style.color = color;
+    
+    if (window.gsap) {
+      gsap.to(confidenceFill, {
+        width: percent + '%',
+        background: topPred.score >= MIN_CONFIDENCE 
+          ? 'linear-gradient(90deg, #00ff88, #6b9e83)'
+          : 'linear-gradient(90deg, #ffaa00, #ff6600)',
+        duration: 0.5,
+        ease: 'power2.out'
+      });
+    } else {
+      confidenceFill.style.width = percent + '%';
+      confidenceFill.style.background = topPred.score >= MIN_CONFIDENCE 
+        ? 'linear-gradient(90deg, #00ff88, #6b9e83)'
+        : 'linear-gradient(90deg, #ffaa00, #ff6600)';
+    }
+  } else {
+    confidenceDisplay.textContent = '';
+    if (window.gsap) {
+      gsap.to(confidenceFill, { width: '0%', duration: 0.3 });
+    } else {
+      confidenceFill.style.width = '0%';
+    }
+  }
+}
+
+// ============================================
+// Enhanced Animation with GSAP
+// ============================================
+function playRecyclingAnimation(wasteType, confidence = 1.0) {
+  if (animationRunning) return;
+  animationRunning = true;
+  
+  let recycleInfo = wasteRecycling.default;
+  let wasteCategory = 'default';
+  const name = wasteType.toLowerCase();
+  
+  if (name.includes('shirt') || name.includes('pants') || name.includes('dress') || 
+      name.includes('jacket') || name.includes('coat') || name.includes('sweater') ||
+      name.includes('tie') || name.includes('sock') || name.includes('shoe') ||
+      name.includes('hat') || name.includes('cap') || name.includes('scarf') ||
+      name.includes('glove') || name.includes('jeans') || name.includes('underwear') ||
+      name.includes('fabric') || name.includes('cloth') || name.includes('clothing')) {
+    recycleInfo = wasteRecycling.clothing;
+    wasteCategory = 'clothing';
+  } else if (name.includes('bottle')) {
+    recycleInfo = wasteRecycling.bottle;
+    wasteCategory = 'bottle';
+  } else if (name.includes('cup') || name.includes('glass') || name.includes('mug')) {
+    recycleInfo = wasteRecycling.cup;
+    wasteCategory = 'cup';
+  } else if (name.includes('paper') || name.includes('book') || name.includes('cardboard') ||
+             name.includes('newspaper') || name.includes('magazine')) {
+    recycleInfo = wasteRecycling.paper;
+    wasteCategory = 'paper';
+  } else if (name.includes('backpack') || name.includes('handbag') || 
+             name.includes('suitcase') || name.includes('luggage') ||
+             name.includes('purse') || name.includes('briefcase') ||
+             (name.includes('bag') && !name.includes('clothing') && !name.includes('paper'))) {
+    recycleInfo = wasteRecycling.bag;
+    wasteCategory = 'bag';
+  } else if (name.includes('plastic') || name.includes('container')) {
+    recycleInfo = wasteRecycling.plastic;
+    wasteCategory = 'plastic';
+  } else if (name.includes('wire') || name.includes('electronic') || 
+             name.includes('phone') || name.includes('metal') || 
+             name.includes('aluminum') || name.includes('keyboard') ||
+             name.includes('mouse') || name.includes('laptop') || name.includes('monitor')) {
+    recycleInfo = wasteRecycling.wire;
+    wasteCategory = 'wire';
+  } else if (name.includes('food') || name.includes('banana') || name.includes('apple') ||
+             name.includes('orange') || name.includes('potato') || name.includes('broccoli') ||
+             name.includes('carrot') || name.includes('salad') || name.includes('fruit')) {
+    recycleInfo = wasteRecycling.food;
+    wasteCategory = 'food';
+  }
+  
+  const container = document.getElementById('animation-container');
+  const title = document.getElementById('product-title');
+  const products = document.getElementById('recycled-products');
+  const binIndicator = document.querySelector('.bin-indicator');
+  const wasteIcon = document.getElementById('waste-icon');
+  
+  binIndicator.className = `bin-indicator ${wasteCategory}`;
+  
+  const icons = {
+    bottle: '🍾', cup: '🥤', bag: '🛍️', plastic: '♻️',
+    paper: '📄', clothing: '👔', wire: '⚡', food: '🍽️', default: '♻️'
+  };
+  wasteIcon.textContent = icons[wasteCategory] || icons.default;
+  
+  title.textContent = `${recycleInfo.title} (${Math.round(confidence * 100)}%)`;
+  products.textContent = recycleInfo.products;
+  
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById('step-' + i).classList.remove('active');
+  }
+  
+  if (window.gsap) {
+    container.style.display = 'block';
+    gsap.fromTo(container, 
+      { opacity: 0, scale: 0.8, y: 50, rotation: -5 },
+      { 
+        opacity: 1, 
+        scale: 1, 
+        y: 0, 
+        rotation: 0,
+        duration: 0.6,
+        ease: 'back.out(1.7)'
+      }
+    );
+    
+    gsap.fromTo(wasteIcon,
+      { scale: 0, rotation: -180, opacity: 0 },
+      {
+        scale: 1,
+        rotation: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: 'elastic.out(1, 0.5)',
+        delay: 0.2
+      }
+    );
+    
+    gsap.fromTo(title,
+      { y: -20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.5, delay: 0.3, ease: 'power2.out' }
+    );
+    
+    let currentStep = 0;
+    const animateSteps = () => {
+      if (currentStep < 5) {
+        const step = document.getElementById('step-' + (currentStep + 1));
+        gsap.fromTo(step,
+          { x: -30, opacity: 0.3, scale: 0.9 },
+          {
+            x: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.4,
+            ease: 'back.out(1.7)',
+            onComplete: () => {
+              step.classList.add('active');
+              currentStep++;
+              setTimeout(animateSteps, 350);
+            }
+          }
+        );
+      } else {
+        gsap.fromTo(products,
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.5, delay: 0.2 }
+        );
+        
+        setTimeout(() => {
+          gsap.to(container, {
+            opacity: 0,
+            scale: 0.9,
+            y: -30,
+            duration: 0.5,
+            ease: 'power2.in',
+            onComplete: () => {
+              container.style.display = 'none';
+              animationRunning = false;
+            }
+          });
+        }, 2500);
+      }
+    };
+    
+    setTimeout(animateSteps, 0.6);
+    
+  } else {
+    container.style.display = 'block';
+    setTimeout(() => container.classList.add('show'), 10);
+    
+    let currentStep = 0;
+    const animateStep = () => {
+      if (currentStep < 5) {
+        document.getElementById('step-' + (currentStep + 1)).classList.add('active');
+        currentStep++;
+        setTimeout(animateStep, 400);
+      } else {
+        setTimeout(() => {
+          container.classList.remove('show');
+          setTimeout(() => {
+            container.style.display = 'none';
+            animationRunning = false;
+          }, 400);
+        }, 2000);
+      }
+    };
+    animateStep();
+  }
+}
+
+// ============================================
+// Interactive Features
+// ============================================
+function speakFeedback(wasteType) {
+  if (!('speechSynthesis' in window)) return;
+  
+  const utterance = new SpeechSynthesisUtterance(`${wasteType} detected`);
+  utterance.rate = 1.5;
+  utterance.pitch = 1.2;
+  speechSynthesis.speak(utterance);
+  
+  const indicator = document.getElementById('voice-indicator');
+  indicator.classList.add('active');
+  setTimeout(() => indicator.classList.remove('active'), 500);
+}
+
+document.getElementById('voice-btn').addEventListener('click', () => {
+  voiceEnabled = !voiceEnabled;
+  const btn = document.getElementById('voice-btn');
+  btn.style.background = voiceEnabled ? 'rgba(0, 255, 136, 0.9)' : 'rgba(0, 255, 0, 0.9)';
+  updateStatus(voiceEnabled ? '🔊 Voice: ON' : '🔇 Voice: OFF', 'info');
+});
+
+document.getElementById('pause-btn').addEventListener('click', () => {
+  detectionPaused = !detectionPaused;
+  const btn = document.getElementById('pause-btn');
+  btn.textContent = detectionPaused ? '▶️' : '⏸️';
+  btn.style.background = detectionPaused ? 'rgba(255, 100, 0, 0.9)' : 'rgba(0, 255, 0, 0.9)';
+  updateStatus(detectionPaused ? '⏸️ PAUSED' : '▶️ DETECTING', 'info');
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  detectionCount = 0;
+  totalConfidence = 0;
+  detectionHistory = [];
+  updateStats('Reset', 0, 0);
+  updateStatus('✅ Stats Reset!', 'success');
+});
+
+// Optimized initialization
+window.addEventListener('load', () => {
+  console.log('🌐 Page loaded, starting app...');
+  init();
+});
+
+// Preload model on page visibility for faster restart
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && !modelReady) {
+    console.log('👁️ Page visible, preloading model...');
+    preloadModel();
+  }
+});
+</script>
+
+</body>
+</html>
