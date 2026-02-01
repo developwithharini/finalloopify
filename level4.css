@@ -1,0 +1,21 @@
+/* Custom styles for MaterialBank Level 4 */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Ensure input visibility */
+input, select {
+    color: #374151; /* gray-700 */
+}
+
+.dark input, .dark select {
+    color: #f3f4f6; /* gray-100 */
+}
+
+input::placeholder, select::placeholder {
+    color: #9ca3af; /* gray-400 */
+}
+
+.dark input::placeholder, .dark select::placeholder {
+    color: #6b7280; /* gray-500 */
+}

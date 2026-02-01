@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Integration Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #000;
+      color: #f5f5f5;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .container {
+      background: #1a1a1a;
+      border: 2px solid #6b9e83;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    h1 { color: #6b9e83; margin-top: 0; }
+    h2 { color: #6b9e83; border-bottom: 1px solid #333; padding-bottom: 10px; }
+    .status {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 15px 0;
+    }
+    .stat-box {
+      background: #000000;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #6b9e83;
+      margin: 10px 0;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+    button {
+      background: #6b9e83;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    button:hover {
+      background: #5a8e72;
+      transform: translateY(-2px);
+    }
+    .log {
+      background: #000000;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 12px;
+      font-family: 'Monaco', monospace;
+      font-size: 11px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin: 10px 0;
+      color: #6b9e83;
+    }
+    .log-entry {
+      padding: 4px 0;
+      border-bottom: 1px solid #222;
+    }
+    .success { color: #6b9e83; }
+    .error { color: #ff6b6b; }
+    .warning { color: #ffd93d; }
+  </style>
+</head>
+<body>
+  <h1>🌱 Loopify Dashboard Integration Test</h1>
+
+  <div class="container">
+    <h2>📊 Dashboard Real-Time Status</h2>
+    <div class="status">
+      <div class="stat-box">
+        <div class="stat-label">Level 1: WasteLens</div>
+        <div class="stat-value" id="l1-val">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Level 2: ShelfLife AI</div>
+        <div class="stat-value" id="l2-val">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Level 3: Reuse Loop</div>
+        <div class="stat-value" id="l3-val">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Level 4: Material Bank</div>
+        <div class="stat-value" id="l4-val">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Level 5: Return Box</div>
+        <div class="stat-value" id="l5-val">0</div>
+      </div>
+    </div>
+    
+    <div class="stat-box" style="background: rgba(0, 255, 0, 0.1); border: 2px solid #6b9e83;">
+      <div class="stat-label">Total Impact</div>
+      <div class="stat-value" id="total-val">0</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>🧪 Simulation Tools</h2>
+    <p>Test dashboard real-time updates by simulating data from each level:</p>
+    
+    <div class="buttons">
+      <button onclick="addLevel1()">+ Add Level 1 Item</button>
+      <button onclick="addLevel2()">+ Add Level 2 Food</button>
+      <button onclick="addLevel3()">+ Add Level 3 Reuse</button>
+      <button onclick="addLevel4()">+ Add Level 4 Material</button>
+      <button onclick="addLevel5()">+ Add Level 5 Return</button>
+    </div>
+
+    <div class="buttons">
+      <button onclick="clearAllData()">🗑️ Clear All Data</button>
+      <button onclick="refreshStatus()">🔄 Refresh Status</button>
+      <button onclick="testDashboard()">✅ Run Full Test</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>📝 Event Log</h2>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div class="container">
+    <h2>💾 Storage Inspection</h2>
+    <div class="buttons">
+      <button onclick="showStorageKeys()">Show Storage Keys</button>
+      <button onclick="exportData()">Export as JSON</button>
+    </div>
+    <div class="log" id="storage-log"></div>
+  </div>
+
+  <script>
+    const log = document.getElementById('log');
+    const storageLog = document.getElementById('storage-log');
+
+    function logEvent(message, type = 'success') {
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      log.insertBefore(entry, log.firstChild);
+      if (log.children.length > 50) log.removeChild(log.lastChild);
+    }
+
+    function updateStatus() {
+      const l1 = JSON.parse(localStorage.getItem('wasteLens_data') || '{}').itemsClassified || 0;
+      const l2 = JSON.parse(localStorage.getItem('shelflife_items_v1') || '[]').length || 0;
+      const l3 = JSON.parse(localStorage.getItem('reuseLogs') || '[]').length || 0;
+      const materials = JSON.parse(localStorage.getItem('materialbank_history') || '[]');
+      const l4 = materials.filter(m => m.matched === true).length;
+      const l5 = JSON.parse(localStorage.getItem('returnbox_history') || '[]').length || 0;
+      const total = l1 + l2 + l3 + l4 + l5;
+
+      document.getElementById('l1-val').textContent = l1;
+      document.getElementById('l2-val').textContent = l2;
+      document.getElementById('l3-val').textContent = l3;
+      document.getElementById('l4-val').textContent = l4;
+      document.getElementById('l5-val').textContent = l5;
+      document.getElementById('total-val').textContent = total;
+    }
+
+    function addLevel1() {
+      const data = JSON.parse(localStorage.getItem('wasteLens_data') || '{"itemsClassified": 0, "classifications": []}');
+      data.itemsClassified = (data.itemsClassified || 0) + 1;
+      data.classifications.push({
+        category: ['Compostable', 'Recyclable', 'Reusable', 'Landfill'][Math.floor(Math.random() * 4)],
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('wasteLens_data', JSON.stringify(data));
+      logEvent(`✅ Level 1: Added WasteLens item (Total: ${data.itemsClassified})`);
+      updateStatus();
+    }
+
+    function addLevel2() {
+      const data = JSON.parse(localStorage.getItem('shelflife_items_v1') || '[]');
+      data.push({
+        name: ['milk', 'eggs', 'bread', 'cheese'][Math.floor(Math.random() * 4)],
+        date: new Date().toISOString()
+      });
+      localStorage.setItem('shelflife_items_v1', JSON.stringify(data));
+      logEvent(`✅ Level 2: Added ShelfLife food (Total: ${data.length})`);
+      updateStatus();
+    }
+
+    function addLevel3() {
+      const data = JSON.parse(localStorage.getItem('reuseLogs') || '[]');
+      data.push({
+        id: `ITEM${Math.random().toString(36).substring(7).toUpperCase()}`,
+        timestamp: new Date().toISOString(),
+        quantity: Math.floor(Math.random() * 5) + 1
+      });
+      localStorage.setItem('reuseLogs', JSON.stringify(data));
+      logEvent(`✅ Level 3: Added Reuse item (Total: ${data.length})`);
+      updateStatus();
+    }
+
+    function addLevel4() {
+      const data = JSON.parse(localStorage.getItem('materialbank_history') || '[]');
+      data.push({
+        name: 'Material ' + (data.length + 1),
+        quantity: Math.floor(Math.random() * 100) + 1,
+        matched: Math.random() > 0.5,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('materialbank_history', JSON.stringify(data));
+      logEvent(`✅ Level 4: Added Material (Total: ${data.length})`);
+      updateStatus();
+    }
+
+    function addLevel5() {
+      const data = JSON.parse(localStorage.getItem('returnbox_history') || '[]');
+      data.push({
+        category: ['food', 'plastic', 'metal', 'glass'][Math.floor(Math.random() * 4)],
+        condition: ['like_new', 'good', 'fair'][Math.floor(Math.random() * 3)],
+        quantity: Math.floor(Math.random() * 3) + 1,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('returnbox_history', JSON.stringify(data));
+      logEvent(`✅ Level 5: Added Return (Total: ${data.length})`);
+      updateStatus();
+    }
+
+    function refreshStatus() {
+      updateStatus();
+      logEvent('🔄 Status refreshed');
+    }
+
+    function clearAllData() {
+      if (confirm('Clear all dashboard data?')) {
+        localStorage.removeItem('wasteLens_data');
+        localStorage.removeItem('shelflife_items_v1');
+        localStorage.removeItem('reuseLogs');
+        localStorage.removeItem('materialbank_history');
+        localStorage.removeItem('returnbox_history');
+        updateStatus();
+        logEvent('🗑️ All data cleared', 'warning');
+      }
+    }
+
+    function testDashboard() {
+      logEvent('🧪 Starting full integration test...', 'warning');
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => addLevel1(), i * 100);
+        setTimeout(() => addLevel2(), i * 150);
+        setTimeout(() => addLevel3(), i * 200);
+        setTimeout(() => addLevel4(), i * 250);
+        setTimeout(() => addLevel5(), i * 300);
+      }
+      setTimeout(() => {
+        updateStatus();
+        logEvent('✅ Test complete! Check app.html Impact Dashboard', 'success');
+      }, 2000);
+    }
+
+    function showStorageKeys() {
+      storageLog.innerHTML = '';
+      const keys = [
+        'wasteLens_data',
+        'shelflife_items_v1',
+        'reuseLogs',
+        'materialbank_history',
+        'returnbox_history'
+      ];
+      
+      keys.forEach(key => {
+        const data = localStorage.getItem(key);
+        const entry = document.createElement('div');
+        entry.className = 'log-entry success';
+        entry.innerHTML = `<strong>${key}:</strong> ${data ? data.substring(0, 100) + '...' : 'empty'}`;
+        storageLog.appendChild(entry);
+      });
+    }
+
+    function exportData() {
+      const data = {};
+      ['wasteLens_data', 'shelflife_items_v1', 'reuseLogs', 'materialbank_history', 'returnbox_history'].forEach(key => {
+        data[key] = JSON.parse(localStorage.getItem(key) || 'null');
+      });
+      const text = JSON.stringify(data, null, 2);
+      const blob = new Blob([text], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'loopify-dashboard-data.json';
+      a.click();
+      logEvent('💾 Data exported to loopify-dashboard-data.json', 'success');
+    }
+
+    // Initialize
+    updateStatus();
+    logEvent('✅ Dashboard Integration Test Ready', 'success');
+    logEvent('ℹ️ Use buttons to simulate level data or check real app data', 'warning');
+  </script>
+</body>
+</html>
